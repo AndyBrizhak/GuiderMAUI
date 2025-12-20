@@ -1,0 +1,113 @@
+﻿.details-page {
+    padding-bottom: 2rem;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.place-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+    .place-header h1 {
+        font-size: 1.3rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+.btn-back-icon {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 0;
+    line-height: 1;
+}
+
+/* Галерея */
+.image-gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 0 0.5rem 10px 0.5rem;
+    margin-bottom: 1rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.gallery-item {
+    flex: 0 0 85%;
+    height: 220px;
+    scroll-snap-align: center;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-surface-hover);
+}
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+/* Контент */
+.info-card {
+    background: var(--bg-surface);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.description-content {
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+}
+    /* Стили для HTML внутри описания */
+    .description-content ::deep p {
+        margin-bottom: 1rem;
+    }
+
+    .description-content ::deep ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .description-content ::deep strong {
+        font-weight: 600;
+    }
+
+.tags-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 0.5rem;
+}
+
+.tag {
+    background: var(--bg-surface-hover);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

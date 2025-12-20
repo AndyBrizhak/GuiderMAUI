@@ -67,7 +67,6 @@
     <ItemGroup>
       <Folder Include="Client\Components\" />
       <Folder Include="Client\Pages\" />
-      <Folder Include="Shared\Models\" />
       <Folder Include="Shared\Services\" />
       <Folder Include="wwwroot\js\" />
     </ItemGroup>

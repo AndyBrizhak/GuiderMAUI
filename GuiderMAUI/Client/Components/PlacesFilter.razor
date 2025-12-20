@@ -1,0 +1,32 @@
+﻿@using GuiderMAUI.Shared.Models
+
+<div class="filter-card">
+    <div class="search-bar">
+        @* Важно: При нажатии Enter форма отправит GET запрос. 
+           Router MAUI перехватит его и обновит параметры в URL, 
+           что заставит Home.razor обновить данные. *@
+        <form method="get" action="/">
+            <input type="text"
+                   name="Q"
+                   value="@CurrentFilters.Q"
+                   placeholder="Search..."
+                   class="form-control" />
+
+            @* Скрытые поля для сохранения остальных фильтров *@
+            @if (!string.IsNullOrEmpty(CurrentFilters.Category))
+            {
+                <input type="hidden" name="Category" value="@CurrentFilters.Category" />
+            }
+            @if (!string.IsNullOrEmpty(CurrentFilters.Province))
+            {
+                <input type="hidden" name="Province" value="@CurrentFilters.Province" />
+            }
+
+            <button type="submit" class="btn-search">🔍</button>
+        </form>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
+}

@@ -65,9 +65,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Client\Components\" />
       <Folder Include="Client\Pages\" />
       <Folder Include="Shared\Services\" />
+      <Folder Include="wwwroot\css\" />
       <Folder Include="wwwroot\js\" />
     </ItemGroup>
 

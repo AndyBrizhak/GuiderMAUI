@@ -1,4 +1,66 @@
 ﻿@page "/"
+@using GuiderMAUI.Shared.Models
+@using GuiderMAUI.Shared.Services
+@using GuiderMAUI.Client.Components
 
-<h1>Guider Mobile</h1>
-<p>Загрузка...</p>
+@inject IPlacesService PlacesService
+@inject NavigationManager Navigation
+
+<div class="home-page">
+    @* Заголовок *@
+    <div class="hero-section">
+        <h1>Explore Local Businesses</h1>
+    </div>
+
+    @* Список мест (Внутри него уже есть фильтр) *@
+    @* Мы передаем туда параметры и результаты загрузки *@
+    <PlacesList CurrentFilters="@currentFilters" 
+                PlacesResponse="@placesResponse" 
+                IsLoading="@isLoading" />
+</div>
+
+@code {
+    // Получаем параметры из URL (Query String)
+    // Когда вы нажмете кнопку поиска, форма отправит GET запрос, и эти поля обновятся
+    [SupplyParameterFromQuery] public string? Q { get; set; }
+    [SupplyParameterFromQuery] public string? Category { get; set; }
+    [SupplyParameterFromQuery] public string? Province { get; set; }
+    [SupplyParameterFromQuery] public string? City { get; set; }
+    [SupplyParameterFromQuery] public int Page { get; set; } = 1;
+
+    private PlaceFilterParams currentFilters = new();
+    private PlacesResponse? placesResponse;
+    private bool isLoading = true;
+
+    // Этот метод срабатывает при инициализации И при изменении параметров URL
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        
+        // 1. Собираем объект фильтра из параметров URL
+        currentFilters = new PlaceFilterParams
+        {
+            Q = Q,
+            Category = Category,
+            Province = Province,
+            City = City,
+            Page = Page < 1 ? 1 : Page,
+            PerPage = 10, // Для мобилки грузим поменьше
+            Status = "active"
+        };
+
+        try
+        {
+            // 2. Запрашиваем данные у API
+            placesResponse = await PlacesService.GetPlacesAsync(currentFilters);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Home Load Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

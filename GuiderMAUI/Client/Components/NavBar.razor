@@ -1,0 +1,37 @@
+﻿@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<nav class="main-nav">
+    <a href="/" class="nav-brand">
+        @* Если у вас есть логотип в wwwroot, раскомментируйте *@
+        @* <img src="logo.png" alt="Guider" class="nav-logo" /> *@
+        <span style="font-weight:bold; font-size:1.2rem;">Guider</span>
+    </a>
+
+    <div class="nav-actions">
+        <button class="theme-toggle" @onclick="ToggleTheme">
+            <span class="icon">@(isDarkMode ? "☀️" : "🌙")</span>
+        </button>
+    </div>
+</nav>
+
+@code {
+    private bool isDarkMode = false;
+
+    // Простая логика переключения темы через JS
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        await JS.InvokeVoidAsync("applyTheme", isDarkMode ? "dark-theme" : "light-theme");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Узнаем текущую тему при запуске
+            isDarkMode = await JS.InvokeAsync<bool>("loadTheme");
+            StateHasChanged();
+        }
+    }
+}

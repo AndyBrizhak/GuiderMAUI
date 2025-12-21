@@ -1,8 +1,8 @@
 ﻿@using GuiderMAUI.Shared.Models
+@inject NavigationManager Navigation
 
 <div class="places-list-container">
-    
-    @* Фильтр рендерим здесь *@
+
     <PlacesFilter CurrentFilters="CurrentFilters" />
 
     @if (IsLoading)
@@ -19,8 +19,28 @@
                 <PlaceCard Place="@place" />
             }
         </div>
-        
-        @* Здесь можно будет добавить пагинацию (Buttons Next/Prev) *@
+
+        @* --- НОВАЯ СЕКЦИЯ: ПАГИНАЦИЯ --- *@
+        <div class="pagination-controls">
+            @* Кнопка НАЗАД *@
+            <button class="btn-page"
+                    disabled="@(PlacesResponse.Page <= 1)"
+                    @onclick="GoToPrevPage">
+                ← Prev
+            </button>
+
+            @* Информация о страницах *@
+            <span class="pagination-info">
+                Page @PlacesResponse.Page of @PlacesResponse.TotalPages
+            </span>
+
+            @* Кнопка ВПЕРЕД *@
+            <button class="btn-page"
+                    disabled="@(PlacesResponse.Page >= PlacesResponse.TotalPages)"
+                    @onclick="GoToNextPage">
+                Next →
+            </button>
+        </div>
     }
     else
     {
@@ -34,4 +54,32 @@
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
     [Parameter] public PlacesResponse? PlacesResponse { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+
+    // Логика перехода на предыдущую страницу
+    private void GoToPrevPage()
+    {
+        if (PlacesResponse != null && PlacesResponse.Page > 1)
+        {
+            var newPage = PlacesResponse.Page - 1;
+            ChangePage(newPage);
+        }
+    }
+
+    // Логика перехода на следующую страницу
+    private void GoToNextPage()
+    {
+        if (PlacesResponse != null && PlacesResponse.Page < PlacesResponse.TotalPages)
+        {
+            var newPage = PlacesResponse.Page + 1;
+            ChangePage(newPage);
+        }
+    }
+
+    // Метод обновляет URL, сохраняя остальные параметры поиска
+    private void ChangePage(int newPage)
+    {
+        // В .NET 8 это самый надежный способ обновить один параметр
+        var uri = Navigation.GetUriWithQueryParameter("Page", newPage);
+        Navigation.NavigateTo(uri);
+    }
 }

@@ -1,32 +1,89 @@
 ﻿@using GuiderMAUI.Shared.Models
+@inject NavigationManager Navigation
 
 <div class="filter-card">
     <div class="search-bar">
-        @* Важно: При нажатии Enter форма отправит GET запрос. 
-           Router MAUI перехватит его и обновит параметры в URL, 
-           что заставит Home.razor обновить данные. *@
-        <form method="get" action="/">
+        <div class="input-group">
             <input type="text"
-                   name="Q"
-                   value="@CurrentFilters.Q"
-                   placeholder="Search..."
+                   @bind="searchTerm"
+                   @bind:event="oninput"
+                   @onkeydown="HandleEnter"
+                   placeholder="Search places..."
                    class="form-control" />
 
-            @* Скрытые поля для сохранения остальных фильтров *@
-            @if (!string.IsNullOrEmpty(CurrentFilters.Category))
+            @* Кнопка очистки *@
+            @if (!string.IsNullOrEmpty(searchTerm))
             {
-                <input type="hidden" name="Category" value="@CurrentFilters.Category" />
-            }
-            @if (!string.IsNullOrEmpty(CurrentFilters.Province))
-            {
-                <input type="hidden" name="Province" value="@CurrentFilters.Province" />
+                <button class="btn-clear" @onclick="ClearSearch" type="button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             }
 
-            <button type="submit" class="btn-search">🔍</button>
-        </form>
+            <button class="btn-search" @onclick="ApplySearch">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
     </div>
 </div>
 
 @code {
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
+
+    private string searchTerm = "";
+
+    protected override void OnParametersSet()
+    {
+        searchTerm = CurrentFilters.Q ?? "";
+    }
+
+    private void HandleEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") ApplySearch();
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = ""; // 1. Очищаем строку
+        ApplySearch();   // 2. Запускаем обновление URL
+    }
+
+    private void ApplySearch()
+    {
+        // Используем словарь для управления параметрами
+        var queryParams = new Dictionary<string, object?>();
+               
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            // Если строка пустая, ЯВНО передаем null.
+            // Это сигнал роутеру: "Удали параметр Q из адресной строки".
+            queryParams["Q"] = null;
+        }
+        else
+        {
+            // Иначе передаем текст поиска
+            queryParams["Q"] = searchTerm;
+        }
+
+        // Сохраняем остальные фильтры
+        if (!string.IsNullOrEmpty(CurrentFilters.Category)) queryParams["Category"] = CurrentFilters.Category;
+        if (!string.IsNullOrEmpty(CurrentFilters.Province)) queryParams["Province"] = CurrentFilters.Province;
+        if (!string.IsNullOrEmpty(CurrentFilters.City)) queryParams["City"] = CurrentFilters.City;
+
+        // Сбрасываем страницу на 1
+        queryParams["Page"] = 1;
+
+        if (CurrentFilters.PerPage > 0) queryParams["PerPage"] = CurrentFilters.PerPage;
+
+        // Генерируем URL
+        var uri = Navigation.GetUriWithQueryParameters(queryParams);
+
+        // Переходим (это вызовет перезагрузку списка в Home.razor)
+        Navigation.NavigateTo(uri);
+    }
 }

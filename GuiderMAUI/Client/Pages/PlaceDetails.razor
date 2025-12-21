@@ -1,0 +1,101 @@
+﻿@page "/place/{url}"
+@using GuiderMAUI.Shared.Models
+@using GuiderMAUI.Shared.Services
+
+@inject IPlacesService PlacesService
+@inject NavigationManager Navigation
+
+<div class="details-page">
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading details...</p>
+        </div>
+    }
+    else if (place == null)
+    {
+        <div class="error-state">
+            <p>Place not found.</p>
+            <button class="btn-back" @onclick='() => Navigation.NavigateTo("/")'>Go Home</button>
+        </div>
+    }
+    else
+    {
+        <div class="place-header">
+            <button class="btn-back-icon" @onclick='() => Navigation.NavigateTo("/")'>
+                @* Символ стрелки назад *@
+                &#8592;
+            </button>
+            <h1>@place.Name</h1>
+        </div>
+
+        @* Галерея картинок (горизонтальный скролл) *@
+        @if (place.ImgLink != null && place.ImgLink.Any())
+        {
+            <div class="image-gallery">
+                @foreach (var img in place.ImgLink)
+                {
+                    <div class="gallery-item">
+                        <img src="@img" alt="@place.Name" loading="lazy" />
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="place-content">
+            @* Карточка с основной инфой *@
+            <div class="info-card">
+                <div class="info-row">
+                    <strong>Category:</strong> <span>@place.Category</span>
+                </div>
+                <div class="info-row">
+                    <strong>Address:</strong>
+                    <span>@(place.Address?.City), @(place.Address?.Province)</span>
+                </div>
+                @* @if (place.Phone?.Callable > 0) *@
+                @* {
+                    <div class="info-row">
+                        <strong>Phone:</strong> <a href="tel:@place.Phone.Callable">@place.Phone.Callable</a>
+                    </div>
+                } *@
+            </div>
+
+            @* Описание с поддержкой HTML *@
+            @if (!string.IsNullOrEmpty(place.Description))
+            {
+                <div class="description-content">
+                    @((MarkupString)place.Description)
+                </div>
+            }
+
+            @* Теги *@
+            @if (place.Tags != null && place.Tags.Any())
+            {
+                <div class="tags-section">
+                    @foreach (var tag in place.Tags)
+                    {
+                        <span class="tag">@tag</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Url { get; set; } = "";
+
+    private Place? place;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Url))
+        {
+            // Используем ваш метод
+            place = await PlacesService.GetPlaceByUrlAsync(Url);
+        }
+        isLoading = false;
+    }
+}

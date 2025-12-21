@@ -14,49 +14,69 @@ public class PlacesService : IPlacesService
 
     public async Task<PlacesResponse?> GetPlacesAsync(PlaceFilterParams filters)
     {
+        // Объявляем переменную url здесь, чтобы видеть её в блоке catch
+        string url = "";
+
         try
         {
             var queryString = BuildQueryString(filters);
-            var url = string.IsNullOrEmpty(queryString) ? "places/filters" : $"places/filters?{queryString}";
+            // Формируем относительный путь. BaseAddress (например http://10.0.2.2:5000/) уже задан в HttpClient
+            url = string.IsNullOrEmpty(queryString) ? "places/filters" : $"places/filters?{queryString}";
 
-            //Console.WriteLine($"Request URL: {url}");
+            // --- БЛОК 1: ПОПЫТКА СЕТЕВОГО ЗАПРОСА ---
+            HttpResponseMessage response;
+            try
+            {
+                // Здесь часто падает из-за SSL или неправильного IP
+                response = await _httpClient.GetAsync(url);
+            }
+            catch (HttpRequestException netEx)
+            {
+                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ (строка ниже)
+                var socketError = netEx.InnerException?.Message; // Тут будет "Connection refused" или "SSL error"
+                System.Diagnostics.Debug.WriteLine($"Network Error: {netEx.Message} | Inner: {socketError}");
+                throw; // Прокидываем ошибку дальше, чтобы увидеть её
+            }
 
-            // Отправляем запрос
-            var response = await _httpClient.GetAsync(url);
-
-            //Console.WriteLine($"Response Status: {response.StatusCode}");
-
+            // --- БЛОК 2: ПРОВЕРКА СТАТУСА ---
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                //Console.WriteLine($"Error Response: {errorContent}");
-                return null;
+                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+                System.Diagnostics.Debug.WriteLine($"API Error ({response.StatusCode}): {errorContent}");
+                return null; // Или throw new Exception($"API Error: {errorContent}");
             }
 
-            // Читаем заголовок X-Total-Count
+            // --- БЛОК 3: ЧТЕНИЕ ЗАГОЛОВКОВ ---
             long totalCount = 0;
             if (response.Headers.TryGetValues("X-Total-Count", out var totalCountValues))
             {
                 long.TryParse(totalCountValues.FirstOrDefault(), out totalCount);
             }
 
-            // Читаем тело ответа (массив мест)
-            var places = await response.Content.ReadFromJsonAsync<List<Place>>();
-
-            if (places == null)
+            // --- БЛОК 4: ДЕСЕРИАЛИЗАЦИЯ JSON ---
+            List<Place>? places;
+            try
             {
-                //Console.WriteLine("Failed to deserialize places");
+                places = await response.Content.ReadFromJsonAsync<List<Place>>();
+            }
+            catch (System.Text.Json.JsonException jsonEx)
+            {
+                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+                // Если формат JSON не совпадает с моделью C#
+                System.Diagnostics.Debug.WriteLine($"JSON Error: {jsonEx.Message}");
+                var rawJson = await response.Content.ReadAsStringAsync(); // Посмотреть, что реально пришло
+                System.Diagnostics.Debug.WriteLine($"Raw JSON: {rawJson}");
                 return null;
             }
 
-            //Console.WriteLine($"Successfully loaded {places.Count} places, Total: {totalCount}");
+            if (places == null) return null;
 
-            // Используем perPage из фильтра, или 20 по умолчанию если не задан
+            // Формируем ответ
             int perPageValue = filters.PerPage > 0 ? filters.PerPage : 20;
             int pageValue = filters.Page > 0 ? filters.Page : 1;
 
-            // Формируем ответ
-            var result = new PlacesResponse
+            return new PlacesResponse
             {
                 Places = places,
                 TotalCount = totalCount,
@@ -64,13 +84,17 @@ public class PlacesService : IPlacesService
                 PerPage = perPageValue,
                 TotalPages = totalCount > 0 ? (int)Math.Ceiling((double)totalCount / perPageValue) : 1
             };
-
-            return result;
         }
         catch (Exception ex)
         {
-            //Console.WriteLine($"Error fetching places: {ex.Message}");
-            //Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            // ГЛОБАЛЬНЫЙ ОТЛОВ
+            // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+            var msg = ex.Message;
+            var inner = ex.InnerException?.Message; // Самое важное!
+            System.Diagnostics.Debug.WriteLine($"CRITICAL ERROR in GetPlacesAsync: {msg}");
+            System.Diagnostics.Debug.WriteLine($"Inner Exception: {inner}");
+
+            // Для MVP можно вернуть null, но лучше видеть ошибку
             return null;
         }
     }

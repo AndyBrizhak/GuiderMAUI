@@ -22,7 +22,7 @@
 }
 
 /* =========================================
-   2. БЛОК ПОИСКА (SEARCH BAR) - ОБНОВЛЕНО
+   2. БЛОК ПОИСКА (SEARCH BAR) 
 ========================================= */
 
 .search-bar {
@@ -81,6 +81,33 @@
         width: 20px;
         height: 20px;
     }
+
+/* Кнопка очистки (крестик) */
+.btn-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent; /* Прозрачный фон */
+    border: none;
+    color: var(--text-secondary); /* Серый цвет (убедитесь, что переменная есть, или используйте #888) */
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    margin-right: -4px; /* Чуть придвигаем к кнопке поиска */
+}
+
+    .btn-clear:active {
+        background-color: rgba(0,0,0,0.1); /* Легкое затемнение при нажатии */
+    }
+
+/* Если  нет переменной --text-secondary, раскомментируйте это: */
+/* .btn-clear {
+    color: #6c757d; 
+} 
+*/
+
 
 /* =========================================
    3. КНОПКИ УПРАВЛЕНИЯ (ФИЛЬТРЫ, СОРТИРОВКА)

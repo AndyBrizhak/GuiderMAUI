@@ -2,39 +2,60 @@
 @inject NavigationManager Navigation
 
 <div class="filter-card">
-    @* Подключаем наш новый компонент *@
+    @* 1. Текстовый поиск *@
     <FilterTextSearch InitialValue="@CurrentFilters.Q" 
-                      OnSearch="HandleSearch" />
+                      OnSearch="HandleTextSearch" />
+
+    @* 2. Фильтр статуса (НОВОЕ) *@
+    <FilterStatus IsOpen="@CurrentFilters.IsOpen" 
+                  OnStatusChanged="HandleStatusChange" />
 </div>
 
 @code {
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
 
-    // Этот метод вызывается, когда FilterTextSearch нажимает "Поиск" или "Очистить"
-    private void HandleSearch(string? newSearchTerm)
+    // --- Обработчики событий от детей ---
+
+    private void HandleTextSearch(string? newSearchTerm)
+    {
+        // Вызываем обновление URL с новым текстом, сохраняя старый статус
+        UpdateUrl(newSearchTerm, CurrentFilters.IsOpen);
+    }
+
+    private void HandleStatusChange(bool? newStatus)
+    {
+        // Вызываем обновление URL с новым статусом, сохраняя старый текст
+        UpdateUrl(CurrentFilters.Q, newStatus);
+    }
+
+    // --- Общая логика навигации ---
+    private void UpdateUrl(string? q, bool? isOpen)
     {
         var queryParams = new Dictionary<string, object?>();
 
-        // 1. Используем НОВОЕ значение поиска
-        if (!string.IsNullOrWhiteSpace(newSearchTerm))
-        {
-            queryParams["Q"] = newSearchTerm;
-        }
+        // 1. Обработка поиска
+        if (!string.IsNullOrWhiteSpace(q))
+            queryParams["Q"] = q;
         else
-        {
-            queryParams["Q"] = null; // Удаляем параметр Q
-        }
+            queryParams["Q"] = null;
 
-        // 2. Сохраняем остальные фильтры
+        // 2. Обработка статуса (НОВОЕ)
+        // Если isOpen == true, добавляем параметр. Если null/false - удаляем.
+        if (isOpen == true)
+            queryParams["isOpen"] = "true"; // API ждет строку или bool
+        else
+            queryParams["isOpen"] = null;
+
+        // 3. Сохраняем остальные фильтры (Категории, Гео и т.д.)
         if (!string.IsNullOrEmpty(CurrentFilters.Category)) queryParams["Category"] = CurrentFilters.Category;
         if (!string.IsNullOrEmpty(CurrentFilters.Province)) queryParams["Province"] = CurrentFilters.Province;
         if (!string.IsNullOrEmpty(CurrentFilters.City)) queryParams["City"] = CurrentFilters.City;
 
-        // 3. Сбрасываем пагинацию
+        // 4. Сброс пагинации
         queryParams["Page"] = 1;
         if (CurrentFilters.PerPage > 0) queryParams["PerPage"] = CurrentFilters.PerPage;
 
-        // 4. Навигация
+        // 5. Навигация
         var uri = Navigation.GetUriWithQueryParameters(queryParams);
         Navigation.NavigateTo(uri);
     }

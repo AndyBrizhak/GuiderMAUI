@@ -2,88 +2,40 @@
 @inject NavigationManager Navigation
 
 <div class="filter-card">
-    <div class="search-bar">
-        <div class="input-group">
-            <input type="text"
-                   @bind="searchTerm"
-                   @bind:event="oninput"
-                   @onkeydown="HandleEnter"
-                   placeholder="Search places..."
-                   class="form-control" />
-
-            @* Кнопка очистки *@
-            @if (!string.IsNullOrEmpty(searchTerm))
-            {
-                <button class="btn-clear" @onclick="ClearSearch" type="button">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            }
-
-            <button class="btn-search" @onclick="ApplySearch">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </button>
-        </div>
-    </div>
+    @* Подключаем наш новый компонент *@
+    <FilterTextSearch InitialValue="@CurrentFilters.Q" 
+                      OnSearch="HandleSearch" />
 </div>
 
 @code {
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
 
-    private string searchTerm = "";
-
-    protected override void OnParametersSet()
+    // Этот метод вызывается, когда FilterTextSearch нажимает "Поиск" или "Очистить"
+    private void HandleSearch(string? newSearchTerm)
     {
-        searchTerm = CurrentFilters.Q ?? "";
-    }
-
-    private void HandleEnter(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") ApplySearch();
-    }
-
-    private void ClearSearch()
-    {
-        searchTerm = ""; // 1. Очищаем строку
-        ApplySearch();   // 2. Запускаем обновление URL
-    }
-
-    private void ApplySearch()
-    {
-        // Используем словарь для управления параметрами
         var queryParams = new Dictionary<string, object?>();
-               
-        if (string.IsNullOrWhiteSpace(searchTerm))
+
+        // 1. Используем НОВОЕ значение поиска
+        if (!string.IsNullOrWhiteSpace(newSearchTerm))
         {
-            // Если строка пустая, ЯВНО передаем null.
-            // Это сигнал роутеру: "Удали параметр Q из адресной строки".
-            queryParams["Q"] = null;
+            queryParams["Q"] = newSearchTerm;
         }
         else
         {
-            // Иначе передаем текст поиска
-            queryParams["Q"] = searchTerm;
+            queryParams["Q"] = null; // Удаляем параметр Q
         }
 
-        // Сохраняем остальные фильтры
+        // 2. Сохраняем остальные фильтры
         if (!string.IsNullOrEmpty(CurrentFilters.Category)) queryParams["Category"] = CurrentFilters.Category;
         if (!string.IsNullOrEmpty(CurrentFilters.Province)) queryParams["Province"] = CurrentFilters.Province;
         if (!string.IsNullOrEmpty(CurrentFilters.City)) queryParams["City"] = CurrentFilters.City;
 
-        // Сбрасываем страницу на 1
+        // 3. Сбрасываем пагинацию
         queryParams["Page"] = 1;
-
         if (CurrentFilters.PerPage > 0) queryParams["PerPage"] = CurrentFilters.PerPage;
 
-        // Генерируем URL
+        // 4. Навигация
         var uri = Navigation.GetUriWithQueryParameters(queryParams);
-
-        // Переходим (это вызовет перезагрузку списка в Home.razor)
         Navigation.NavigateTo(uri);
     }
 }

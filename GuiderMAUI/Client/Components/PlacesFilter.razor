@@ -1,32 +1,71 @@
 ﻿@using GuiderMAUI.Shared.Models
+@inject NavigationManager Navigation
 
 <div class="filter-card">
     <div class="search-bar">
-        @* Важно: При нажатии Enter форма отправит GET запрос. 
-           Router MAUI перехватит его и обновит параметры в URL, 
-           что заставит Home.razor обновить данные. *@
-        <form method="get" action="/">
+        @* Используем div вместо form для предотвращения перезагрузки *@
+        <div class="input-group">
             <input type="text"
-                   name="Q"
-                   value="@CurrentFilters.Q"
-                   placeholder="Search..."
+                   @bind="searchTerm"
+                   @bind:event="oninput"
+                   @onkeydown="HandleEnter"
+                   placeholder="Search places..."
                    class="form-control" />
 
-            @* Скрытые поля для сохранения остальных фильтров *@
-            @if (!string.IsNullOrEmpty(CurrentFilters.Category))
-            {
-                <input type="hidden" name="Category" value="@CurrentFilters.Category" />
-            }
-            @if (!string.IsNullOrEmpty(CurrentFilters.Province))
-            {
-                <input type="hidden" name="Province" value="@CurrentFilters.Province" />
-            }
-
-            <button type="submit" class="btn-search">🔍</button>
-        </form>
+            <button class="btn-search" @onclick="ApplySearch">
+                @* SVG Иконка лупы *@
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
     </div>
 </div>
 
 @code {
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
+
+    private string searchTerm = "";
+
+    protected override void OnParametersSet()
+    {
+        searchTerm = CurrentFilters.Q ?? "";
+    }
+
+    private void HandleEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ApplySearch();
+        }
+    }
+
+    private void ApplySearch()
+    {
+        var queryParams = new Dictionary<string, object?>();
+
+        // 1. Поиск
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            queryParams.Add("Q", searchTerm);
+        }
+
+        // 2. Сохраняем старые фильтры
+        if (!string.IsNullOrEmpty(CurrentFilters.Category)) queryParams.Add("Category", CurrentFilters.Category);
+        if (!string.IsNullOrEmpty(CurrentFilters.Province)) queryParams.Add("Province", CurrentFilters.Province);
+        if (!string.IsNullOrEmpty(CurrentFilters.City)) queryParams.Add("City", CurrentFilters.City);
+
+        // 3. Сброс на 1 страницу
+        queryParams.Add("Page", 1);
+
+        // 4.  Сохраняем размер страницы (чтобы осталось 4, а не сбросилось на 20)
+        if (CurrentFilters.PerPage > 0)
+        {
+            queryParams.Add("PerPage", CurrentFilters.PerPage);
+        }
+
+        var uri = Navigation.GetUriWithQueryParameters(queryParams);
+        Navigation.NavigateTo(uri);
+    }
 }

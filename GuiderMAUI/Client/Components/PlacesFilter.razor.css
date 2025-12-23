@@ -14,3 +14,11 @@
         padding: 1.5rem;
     }
 }
+
+.quick-filters-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}

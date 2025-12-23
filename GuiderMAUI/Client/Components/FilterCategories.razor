@@ -1,0 +1,64 @@
+﻿<div class="categories-container">
+    <div class="scroll-wrapper">
+        
+        @* 1. Кнопка ALL (Все) *@
+        @* Активна, если категория пустая *@
+        <button type="button" 
+                class="cat-chip @(string.IsNullOrEmpty(SelectedCategory) ? "active" : "")"
+                @onclick="SelectAll">
+            <span>All</span>
+        </button>
+
+        @* 2.  категории *@
+        @foreach (var cat in categories)
+        {
+            <button type="button" 
+                    class="cat-chip @(IsSelected(cat.Id) ? "active" : "")"
+                    @onclick="() => SelectCategory(cat.Id)">
+                <span class="icon">@cat.Icon</span>
+                <span>@cat.Name</span>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? SelectedCategory { get; set; }
+    [Parameter] public EventCallback<string?> OnCategoryChanged { get; set; }
+
+    // Список в точности как в  Blazor (Id - это значение для API)
+    private List<(string Id, string Name, string Icon)> categories = new()
+    {
+        ("services",   "Services",   "🛠️"),
+        ("to-eat",     "Foods",      "🍔"),
+        ("adventures", "Adventures", "🏄"),
+        ("shops",      "Shopping",   "🛍️")
+    };
+
+    private bool IsSelected(string catId) 
+    {
+        return string.Equals(SelectedCategory, catId, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task SelectAll()
+    {
+        if (!string.IsNullOrEmpty(SelectedCategory))
+        {
+            await OnCategoryChanged.InvokeAsync(null);
+        }
+    }
+
+    private async Task SelectCategory(string catId)
+    {
+        // Если нажали на ту же категорию -> сбрасываем в All (null)
+        // Иначе -> выбираем новую
+        if (IsSelected(catId))
+        {
+            await OnCategoryChanged.InvokeAsync(null);
+        }
+        else
+        {
+            await OnCategoryChanged.InvokeAsync(catId);
+        }
+    }
+}

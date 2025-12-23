@@ -2,82 +2,80 @@
 @inject NavigationManager Navigation
 
 <div class="filter-card">
-    @*  Текстовый поиск *@
-    <FilterTextSearch InitialValue="@CurrentFilters.Q"
+    @* 1. Поиск *@
+    <FilterTextSearch InitialValue="@CurrentFilters.Q" 
                       OnSearch="HandleTextSearch" />
 
-    @*  Строка быстрых фильтров *@
+    @* 3. Быстрые фильтры (Гео + Статус) *@
     <div class="quick-filters-row">
-
-        @* Кнопка Гео *@
         <FilterGeo Latitude="@CurrentFilters.Latitude"
                    Longitude="@CurrentFilters.Longitude"
                    OnGeoChanged="HandleGeoChange" />
 
-        @* Переключатель Open Now *@
-        <FilterStatus IsOpen="@CurrentFilters.IsOpen"
+        <FilterStatus IsOpen="@CurrentFilters.IsOpen" 
                       OnStatusChanged="HandleStatusChange" />
     </div>
+
+    @* 2. КАТЕГОРИИ  *@
+    <FilterCategories SelectedCategory="@CurrentFilters.Category"
+                      OnCategoryChanged="HandleCategoryChange" />
+
 </div>
 
 @code {
     [Parameter] public PlaceFilterParams CurrentFilters { get; set; } = new();
 
-    //  Обработчик ТЕКСТА ---
-    private void HandleTextSearch(string? q)
-    {
-        // Передаем новый текст, остальные параметры берем из текущих
-        Navigate(q, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
-    }
+    // --- Обработчики ---
 
-    //  Обработчик СТАТУСА (Open Now) ---
-    private void HandleStatusChange(bool? isOpen)
-    {
-        // Передаем новый статус, остальное сохраняем
-        Navigate(CurrentFilters.Q, isOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
-    }
+    private void HandleTextSearch(string? q) => 
+        Navigate(q, CurrentFilters.Category, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
 
-    //  Обработчик ГЕО  ---
-    private void HandleGeoChange((double? lat, double? lon, double? dist) geo)
-    {
-        // Передаем новые координаты
-        Navigate(CurrentFilters.Q, CurrentFilters.IsOpen, geo.lat, geo.lon, geo.dist);
-    }
+    // НОВОЕ: Обработчик смены категории
+    private void HandleCategoryChange(string? newCategory) =>
+        Navigate(CurrentFilters.Q, newCategory, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
 
-    // --- ГЛАВНЫЙ МЕТОД НАВИГАЦИИ  ---
-    private void Navigate(string? q, bool? isOpen, double? lat, double? lon, double? dist)
+    private void HandleStatusChange(bool? isOpen) => 
+        Navigate(CurrentFilters.Q, CurrentFilters.Category, isOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
+
+    private void HandleGeoChange((double? lat, double? lon, double? dist) geo) => 
+        Navigate(CurrentFilters.Q, CurrentFilters.Category, CurrentFilters.IsOpen, geo.lat, geo.lon, geo.dist);
+
+
+    // --- Главный метод Навигации (Обновлен) ---
+    private void Navigate(string? q, string? category, bool? isOpen, double? lat, double? lon, double? dist)
     {
         var p = new Dictionary<string, object?>();
 
-        //  Поиск (Если пустой - явно null)
+        // 1. Поиск
         if (!string.IsNullOrWhiteSpace(q)) p["Q"] = q;
         else p["Q"] = null;
 
-        //  Статус (ИСПРАВЛЕНИЕ БАГА: Явный null удаляет параметр из URL)
+        // 2. Категория (НОВОЕ)
+        if (!string.IsNullOrEmpty(category)) p["Category"] = category;
+        else p["Category"] = null;
+
+        // 3. Статус
         if (isOpen == true) p["isOpen"] = "true";
         else p["isOpen"] = null;
 
-        //  Гео-локация (Важно использовать InvariantCulture, чтобы были точки, а не запятые)
+        // 4. Гео (с точкой вместо запятой)
         if (lat.HasValue) p["latitude"] = lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         else p["latitude"] = null;
 
         if (lon.HasValue) p["longitude"] = lon.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         else p["longitude"] = null;
 
-        if (dist.HasValue) p["distance"] = dist.Value;
+        if (dist.HasValue) p["distance"] = dist.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
         else p["distance"] = null;
 
-        //  Сохраняем старые фильтры (Категория, Город, Провинция)
-        if (!string.IsNullOrEmpty(CurrentFilters.Category)) p["Category"] = CurrentFilters.Category;
+        // 5. Остальные поля (пока берем старые)
         if (!string.IsNullOrEmpty(CurrentFilters.Province)) p["Province"] = CurrentFilters.Province;
         if (!string.IsNullOrEmpty(CurrentFilters.City)) p["City"] = CurrentFilters.City;
 
-        //  Сброс страницы
+        // 6. Сброс страницы
         p["Page"] = 1;
         if (CurrentFilters.PerPage > 0) p["PerPage"] = CurrentFilters.PerPage;
 
-        // Генерируем URL
-        var uri = Navigation.GetUriWithQueryParameters(p);
-        Navigation.NavigateTo(uri);
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(p));
     }
 }

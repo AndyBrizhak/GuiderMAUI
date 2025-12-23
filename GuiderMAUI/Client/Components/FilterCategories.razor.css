@@ -1,0 +1,46 @@
+﻿.categories-container {
+    width: 100%;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.scroll-wrapper {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 5px; /* Место под скрытый скроллбар */
+    /* Скрываем скроллбар */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+    .scroll-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+.cat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px; /* Овальные кнопки */
+    border: 1px solid var(--border-color, #ccc);
+    background: var(--bg-surface, #fff);
+    color: var(--text-primary, #333);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+    .cat-chip:active {
+        transform: scale(0.95);
+    }
+
+    /* Активная кнопка: темная */
+    .cat-chip.active {
+        background-color: #212529;
+        color: #fff;
+        border-color: #212529;
+    }

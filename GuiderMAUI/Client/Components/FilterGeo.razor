@@ -42,7 +42,7 @@
     private string? errorMessage;
 
     // Фиксированная дистанция 10 км
-    private const double FIXED_DISTANCE_KM = 10;
+    private const double FIXED_DISTANCE = 10000;
 
     private async Task ToggleGeoLocation()
     {
@@ -71,7 +71,7 @@
                 double mockLon = -85.6980;
 
                 // 3. Возвращаем эти координаты и выходим из метода
-                await OnGeoChanged.InvokeAsync((mockLat, mockLon, FIXED_DISTANCE_KM));
+                await OnGeoChanged.InvokeAsync((mockLat, mockLon, FIXED_DISTANCE));
 
                 // Важно: блок finally выполнится даже после return, поэтому isLoading станет false
                 return;
@@ -103,7 +103,7 @@
             if (location != null)
             {
                 // Успех! Отправляем реальные координаты
-                await OnGeoChanged.InvokeAsync((location.Latitude, location.Longitude, FIXED_DISTANCE_KM));
+                await OnGeoChanged.InvokeAsync((location.Latitude, location.Longitude, FIXED_DISTANCE));
             }
             else
             {

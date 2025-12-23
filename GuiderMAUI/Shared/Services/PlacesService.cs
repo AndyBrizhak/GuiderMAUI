@@ -32,7 +32,7 @@ public class PlacesService : IPlacesService
             }
             catch (HttpRequestException netEx)
             {
-                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ (строка ниже)
+                
                 var socketError = netEx.InnerException?.Message; // Тут будет "Connection refused" или "SSL error"
                 System.Diagnostics.Debug.WriteLine($"Network Error: {netEx.Message} | Inner: {socketError}");
                 throw; // Прокидываем ошибку дальше, чтобы увидеть её
@@ -42,7 +42,7 @@ public class PlacesService : IPlacesService
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+                
                 System.Diagnostics.Debug.WriteLine($"API Error ({response.StatusCode}): {errorContent}");
                 return null; // Или throw new Exception($"API Error: {errorContent}");
             }
@@ -62,7 +62,7 @@ public class PlacesService : IPlacesService
             }
             catch (System.Text.Json.JsonException jsonEx)
             {
-                // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+                
                 // Если формат JSON не совпадает с моделью C#
                 System.Diagnostics.Debug.WriteLine($"JSON Error: {jsonEx.Message}");
                 var rawJson = await response.Content.ReadAsStringAsync(); // Посмотреть, что реально пришло
@@ -88,7 +88,7 @@ public class PlacesService : IPlacesService
         catch (Exception ex)
         {
             // ГЛОБАЛЬНЫЙ ОТЛОВ
-            // ПОСТАВЬТЕ БРЕЙКПОИНТ ЗДЕСЬ
+            
             var msg = ex.Message;
             var inner = ex.InnerException?.Message; // Самое важное!
             System.Diagnostics.Debug.WriteLine($"CRITICAL ERROR in GetPlacesAsync: {msg}");
@@ -168,19 +168,21 @@ public class PlacesService : IPlacesService
             queryParams.Add($"tagsMode=all");
         }
 
-        
+
         //if (filters.Tags?.Any() == true || filters.TagsMode != "any")
         //    queryParams.Add($"tagsMode={filters.TagsMode}");
 
         // Геопространственный поиск
+        // Используем CultureInfo.InvariantCulture, чтобы числа всегда записывались с точкой (10.55),
+        // а не с запятой (10,55), независимо от языка телефона.
         if (filters.Latitude.HasValue)
-            queryParams.Add($"latitude={filters.Latitude.Value}");
+            queryParams.Add($"latitude={filters.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 
         if (filters.Longitude.HasValue)
-            queryParams.Add($"longitude={filters.Longitude.Value}");
+            queryParams.Add($"longitude={filters.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 
         if (filters.Distance.HasValue)
-            queryParams.Add($"distance={filters.Distance.Value}");
+            queryParams.Add($"distance={filters.Distance.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 
         // Фильтр по времени работы
         if (filters.IsOpen.HasValue)

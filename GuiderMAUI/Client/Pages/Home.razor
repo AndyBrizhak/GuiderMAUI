@@ -17,12 +17,17 @@
 </div>
 
 @code {
+    
     [SupplyParameterFromQuery] public string? Q { get; set; }
     [SupplyParameterFromQuery] public string? Category { get; set; }
     [SupplyParameterFromQuery] public string? Province { get; set; }
     [SupplyParameterFromQuery] public string? City { get; set; }
     [SupplyParameterFromQuery] public int Page { get; set; } = 1;
-    [SupplyParameterFromQuery] public bool? IsOpen { get; set; } 
+    [SupplyParameterFromQuery] public bool? IsOpen { get; set; }
+        
+    [SupplyParameterFromQuery] public double? Latitude { get; set; }
+    [SupplyParameterFromQuery] public double? Longitude { get; set; }
+    [SupplyParameterFromQuery] public double? Distance { get; set; }
 
     private PlaceFilterParams currentFilters = new();
     private PlacesResponse? placesResponse;
@@ -31,7 +36,7 @@
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
-
+                
         currentFilters = new PlaceFilterParams
         {
             Q = Q,
@@ -41,11 +46,16 @@
             Page = Page < 1 ? 1 : Page,
             PerPage = 4,
             Status = "active",
-            IsOpen = IsOpen 
+            IsOpen = IsOpen,
+                        
+            Latitude = Latitude,
+            Longitude = Longitude,
+            Distance = Distance
         };
 
         try
         {
+            
             placesResponse = await PlacesService.GetPlacesAsync(currentFilters);
         }
         catch (Exception ex)

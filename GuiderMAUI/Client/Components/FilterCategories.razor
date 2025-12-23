@@ -1,15 +1,17 @@
-﻿<div class="categories-container">
-    <div class="scroll-wrapper">
+﻿@using Microsoft.Maui.Devices
+
+<div class="categories-container">
+    @* Добавляем динамический класс: mobile-mode или desktop-mode *@
+    <div class="scroll-wrapper @scrollClass">
         
         @* 1. Кнопка ALL (Все) *@
-        @* Активна, если категория пустая *@
         <button type="button" 
                 class="cat-chip @(string.IsNullOrEmpty(SelectedCategory) ? "active" : "")"
                 @onclick="SelectAll">
             <span>All</span>
         </button>
 
-        @* 2.  категории *@
+        @* 2. Категории *@
         @foreach (var cat in categories)
         {
             <button type="button" 
@@ -26,7 +28,10 @@
     [Parameter] public string? SelectedCategory { get; set; }
     [Parameter] public EventCallback<string?> OnCategoryChanged { get; set; }
 
-    // Список в точности как в  Blazor (Id - это значение для API)
+    // Определяем платформу: если Windows -> desktop-mode, иначе -> mobile-mode
+    private string scrollClass => DeviceInfo.Platform == DevicePlatform.WinUI ? "desktop-mode" : "mobile-mode";
+
+    // Ваши категории (как в Blazor)
     private List<(string Id, string Name, string Icon)> categories = new()
     {
         ("services",   "Services",   "🛠️"),
@@ -50,8 +55,7 @@
 
     private async Task SelectCategory(string catId)
     {
-        // Если нажали на ту же категорию -> сбрасываем в All (null)
-        // Иначе -> выбираем новую
+        // Клик по активной -> сброс. Клик по новой -> выбор.
         if (IsSelected(catId))
         {
             await OnCategoryChanged.InvokeAsync(null);

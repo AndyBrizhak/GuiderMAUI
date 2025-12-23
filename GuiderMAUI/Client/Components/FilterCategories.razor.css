@@ -1,62 +1,88 @@
-﻿/* 1. Контейнер: Жестко ограничиваем ширину */
+﻿/* --- 1. Контейнер --- */
 .categories-container {
-    /* ВАЖНО: 100vw - это полная ширина экрана. 
-       Мы вычитаем 32px (примерно), чтобы учесть отступы (padding) родительской карточки.
-       Это заставляет блок оставаться в пределах экрана и включает внутренний скролл. */
     width: 100%;
+    /* ВАЖНО: Ограничиваем ширину экрана минус отступы.
+       Это предотвращает растягивание родительского блока на Android. */
     max-width: calc(100vw - 48px);
-    margin-top: 8px;
+    margin-top: 12px;
     margin-bottom: 8px;
 }
 
-/* 2. Обертка скролла */
+/* --- 2. Обертка скролла (Общие настройки) --- */
 .scroll-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 8px; /* Расстояние между кнопками */
-    /* Включаем скролл */
+    /* Включаем горизонтальную прокрутку */
     overflow-x: auto;
-    /* Плавность на iOS/Android */
+    /* Плавный скролл для iOS/Android */
     -webkit-overflow-scrolling: touch;
-    /* Убираем лишние отступы, чтобы не мешать скроллу */
-    padding-bottom: 4px;
-    /* Скрываем скроллбар */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    padding-bottom: 4px; /* Место под скроллбар */
 }
 
-    .scroll-wrapper::-webkit-scrollbar {
-        display: none;
+    /* --- 3. Настройки для МОБИЛЬНЫХ (Android / iOS) --- */
+    /* Скрываем полосу прокрутки, так как листаем пальцем */
+    .scroll-wrapper.mobile-mode {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE */
     }
 
-/* 3. Компактные кнопки (Chips) */
+        .scroll-wrapper.mobile-mode::-webkit-scrollbar {
+            display: none; /* Chrome/Safari/WebView */
+        }
+
+    /* --- 4. Настройки для WINDOWS (Desktop) --- */
+    /* Показываем тонкую полоску для мыши */
+    .scroll-wrapper.desktop-mode {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,0,0,0.2) transparent;
+        cursor: default;
+    }
+
+        /* Стилизация полосы прокрутки (Webkit / WebView2) */
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar {
+            height: 6px; /* Высота полоски */
+            display: block;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2); /* Цвет ползунка */
+            border-radius: 4px;
+        }
+
+            .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.4); /* Цвет при наведении */
+            }
+
+/* --- 5. Стили кнопок (Chips) --- */
 .cat-chip {
-    /* Не сжимать и не растягивать */
+    /* ВАЖНО: Запрещаем кнопкам сжиматься или растягиваться */
     flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    /* Уменьшенные отступы (было 8px 16px) */
-    padding: 6px 12px;
-    height: 32px; /* Фиксированная высота, чуть меньше */
-
-    border-radius: 16px;
-    border: 1px solid var(--border-color, #e0e0e0);
+    /* Компактные отступы */
+    padding: 6px 14px;
+    height: 36px;
+    border-radius: 18px;
+    border: 1px solid var(--border-color, #ccc);
     background: var(--bg-surface, #fff);
     color: var(--text-primary, #333);
-    /* Уменьшенный шрифт */
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    white-space: nowrap; /* Текст в одну строку */
+    white-space: nowrap; /* Текст не переносится */
     transition: all 0.2s ease;
 }
 
-    /* Иконка внутри кнопки */
     .cat-chip .icon {
-        font-size: 1rem; /* Иконку можно оставить нормального размера */
+        font-size: 1rem;
         line-height: 1;
     }
 

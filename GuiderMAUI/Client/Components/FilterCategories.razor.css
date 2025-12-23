@@ -1,14 +1,26 @@
-﻿.categories-container {
+﻿/* 1. Контейнер: Жестко ограничиваем ширину */
+.categories-container {
+    /* ВАЖНО: 100vw - это полная ширина экрана. 
+       Мы вычитаем 32px (примерно), чтобы учесть отступы (padding) родительской карточки.
+       Это заставляет блок оставаться в пределах экрана и включает внутренний скролл. */
     width: 100%;
-    margin-top: 12px;
-    overflow: hidden;
+    max-width: calc(100vw - 48px);
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
+/* 2. Обертка скролла */
 .scroll-wrapper {
     display: flex;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px; /* Расстояние между кнопками */
+    /* Включаем скролл */
     overflow-x: auto;
-    padding-bottom: 5px; /* Место под скрытый скроллбар */
+    /* Плавность на iOS/Android */
+    -webkit-overflow-scrolling: touch;
+    /* Убираем лишние отступы, чтобы не мешать скроллу */
+    padding-bottom: 4px;
     /* Скрываем скроллбар */
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -18,27 +30,43 @@
         display: none;
     }
 
+/* 3. Компактные кнопки (Chips) */
 .cat-chip {
+    /* Не сжимать и не растягивать */
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 8px 16px;
-    border-radius: 20px; /* Овальные кнопки */
-    border: 1px solid var(--border-color, #ccc);
+    /* Уменьшенные отступы (было 8px 16px) */
+    padding: 6px 12px;
+    height: 32px; /* Фиксированная высота, чуть меньше */
+
+    border-radius: 16px;
+    border: 1px solid var(--border-color, #e0e0e0);
     background: var(--bg-surface, #fff);
     color: var(--text-primary, #333);
-    font-size: 0.9rem;
+    /* Уменьшенный шрифт */
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    white-space: nowrap;
+    white-space: nowrap; /* Текст в одну строку */
     transition: all 0.2s ease;
 }
 
-    .cat-chip:active {
-        transform: scale(0.95);
+    /* Иконка внутри кнопки */
+    .cat-chip .icon {
+        font-size: 1rem; /* Иконку можно оставить нормального размера */
+        line-height: 1;
     }
 
-    /* Активная кнопка: темная */
+    /* Эффект нажатия */
+    .cat-chip:active {
+        transform: scale(0.95);
+        background-color: #f0f0f0;
+    }
+
+    /* Активное состояние */
     .cat-chip.active {
         background-color: #212529;
         color: #fff;

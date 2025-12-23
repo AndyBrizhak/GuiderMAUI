@@ -39,10 +39,7 @@
     </Application>
   </Applications>
 
-  <Capabilities>
-    <rescap:Capability Name="runFullTrust" />
-    <DeviceCapability Name="location"/>
-  </Capabilities>
+  
   <Capabilities>
     <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />

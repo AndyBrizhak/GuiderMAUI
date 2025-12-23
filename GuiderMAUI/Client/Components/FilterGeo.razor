@@ -41,7 +41,7 @@
     private bool isLoading = false;
     private string? errorMessage;
 
-    // Фиксированная дистанция 10 км (как мы договорились)
+    // Фиксированная дистанция 10 км
     private const double FIXED_DISTANCE_KM = 10;
 
     private async Task ToggleGeoLocation()
@@ -55,19 +55,40 @@
             return;
         }
 
-        // 2. Если выключено -> пытаемся найти координаты
+        // 2. Если выключено -> включаем поиск
         isLoading = true;
         try
         {
-            // Проверяем, есть ли разрешение на использование GPS
+            // ===========================================
+            // ЛАЙФХАК ДЛЯ ТЕСТИРОВАНИЯ НА WINDOWS
+            // ===========================================
+#if WINDOWS
+                // 1. Имитируем небольшую задержку, как будто ищем спутники
+                await Task.Delay(1000);
+
+                // 2. Хардкод координат Playas del Coco, Costa Rica
+                double mockLat = 10.5525;
+                double mockLon = -85.6980;
+
+                // 3. Возвращаем эти координаты и выходим из метода
+                await OnGeoChanged.InvokeAsync((mockLat, mockLon, FIXED_DISTANCE_KM));
+
+                // Важно: блок finally выполнится даже после return, поэтому isLoading станет false
+                return;
+#endif
+            // ===========================================
+
+
+            // --- КОД ДЛЯ ANDROID / iOS (Реальный GPS) ---
+
+            // 1. Проверяем разрешения
             var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
 
-            // Если разрешения нет - запрашиваем у пользователя
             if (status != PermissionStatus.Granted)
             {
+                // Запрашиваем права, если их нет
                 status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
 
-                // Если пользователь отказал
                 if (status != PermissionStatus.Granted)
                 {
                     errorMessage = "Permission denied";
@@ -75,13 +96,13 @@
                 }
             }
 
-            // Запрашиваем координаты (ждем до 10 секунд)
+            // 2. Запрашиваем реальные координаты
             var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
             var location = await Geolocation.Default.GetLocationAsync(request);
 
             if (location != null)
             {
-                // Успех! Отправляем координаты родителю
+                // Успех! Отправляем реальные координаты
                 await OnGeoChanged.InvokeAsync((location.Latitude, location.Longitude, FIXED_DISTANCE_KM));
             }
             else
@@ -91,12 +112,12 @@
         }
         catch (Exception ex)
         {
-            // Ошибка (например, GPS выключен в настройках телефона)
             Console.WriteLine($"Geo Error: {ex.Message}");
             errorMessage = "GPS Error";
         }
         finally
         {
+            // Снимаем спиннер загрузки (работает и для Windows, и для Android)
             isLoading = false;
         }
     }

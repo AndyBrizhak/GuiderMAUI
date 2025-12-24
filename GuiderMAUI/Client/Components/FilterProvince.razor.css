@@ -1,0 +1,92 @@
+﻿/* 1. Контейнер */
+.province-container {
+    width: 100%;
+    /* ВАЖНО: Ограничение ширины для мобильных */
+    max-width: calc(100vw - 48px);
+    margin-top: 8px;
+    margin-bottom: 8px;
+    min-height: 36px; /* Чтобы не прыгало при загрузке */
+}
+
+.loading-state {
+    font-size: 0.8rem;
+    color: #888;
+    padding: 8px;
+}
+
+/* 2. Обертка скролла */
+.scroll-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+
+    /* Настройки для MOBILE */
+    .scroll-wrapper.mobile-mode {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .scroll-wrapper.mobile-mode::-webkit-scrollbar {
+            display: none;
+        }
+
+    /* Настройки для DESKTOP (Windows) */
+    .scroll-wrapper.desktop-mode {
+        scrollbar-width: thin;
+        cursor: default;
+    }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar {
+            height: 6px;
+            display: block;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+            .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.4);
+            }
+
+/* 3. Стиль кнопок (Chips) */
+.prov-chip {
+    flex: 0 0 auto; /* Не сжимать */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    height: 34px; /* Чуть ниже категорий для визуальной иерархии */
+
+    border-radius: 8px; /* Чуть более квадратные края, чтобы отличаться от круглых категорий */
+    border: 1px solid var(--border-color, #ccc);
+    background: var(--bg-surface, #fff);
+    color: var(--text-primary, #333);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+    .prov-chip:active {
+        transform: scale(0.95);
+        background-color: #f0f0f0;
+    }
+
+    /* Активная кнопка */
+    .prov-chip.active {
+        background-color: #0d6efd; /* Синий цвет для локации (отличие от черного в категориях) */
+        color: #fff;
+        border-color: #0d6efd;
+    }

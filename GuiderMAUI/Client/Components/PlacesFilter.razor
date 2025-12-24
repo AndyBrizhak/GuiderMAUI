@@ -27,6 +27,12 @@
                     CurrentCategory="@CurrentFilters.Category"
                     OnProvinceChanged="HandleProvinceChange" />
 
+    @* 5. ГОРОДА  *@
+    <FilterCity SelectedCity="@CurrentFilters.City"
+                CurrentCategory="@CurrentFilters.Category"
+                CurrentProvince="@CurrentFilters.Province"
+                OnCityChanged="HandleCityChange" />
+
 </div>
 
 @code {
@@ -40,12 +46,13 @@
     private void HandleCategoryChange(string? cat) =>
         Navigate(CurrentFilters.Q, cat, CurrentFilters.Province, CurrentFilters.City, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
 
-    // НОВОЕ: Обработчик Провинции
-    private void HandleProvinceChange(string? prov)
-    {
-        // При смене провинции ОБЯЗАТЕЛЬНО сбрасываем City в null
+    // При смене провинции сбрасываем город (null)
+    private void HandleProvinceChange(string? prov) =>
         Navigate(CurrentFilters.Q, CurrentFilters.Category, prov, null, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
-    }
+
+    //  Обработчик смены города
+    private void HandleCityChange(string? city) =>
+        Navigate(CurrentFilters.Q, CurrentFilters.Category, CurrentFilters.Province, city, CurrentFilters.IsOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
 
     private void HandleStatusChange(bool? isOpen) =>
         Navigate(CurrentFilters.Q, CurrentFilters.Category, CurrentFilters.Province, CurrentFilters.City, isOpen, CurrentFilters.Latitude, CurrentFilters.Longitude, CurrentFilters.Distance);
@@ -54,26 +61,24 @@
         Navigate(CurrentFilters.Q, CurrentFilters.Category, CurrentFilters.Province, CurrentFilters.City, CurrentFilters.IsOpen, geo.lat, geo.lon, geo.dist);
 
 
-    // --- УНИВЕРСАЛЬНЫЙ МЕТОД (Включает Province и City) ---
+    // --- УНИВЕРСАЛЬНЫЙ МЕТОД ---
     private void Navigate(string? q, string? category, string? province, string? city, bool? isOpen, double? lat, double? lon, double? dist)
     {
         var p = new Dictionary<string, object?>();
 
         if (!string.IsNullOrWhiteSpace(q)) p["Q"] = q; else p["Q"] = null;
         if (!string.IsNullOrEmpty(category)) p["Category"] = category; else p["Category"] = null;
-
-        // Локация
         if (!string.IsNullOrEmpty(province)) p["Province"] = province; else p["Province"] = null;
+
+        // Добавляем Город
         if (!string.IsNullOrEmpty(city)) p["City"] = city; else p["City"] = null;
 
         if (isOpen == true) p["isOpen"] = "true"; else p["isOpen"] = null;
 
-        // Гео
         if (lat.HasValue) p["latitude"] = lat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture); else p["latitude"] = null;
         if (lon.HasValue) p["longitude"] = lon.Value.ToString(System.Globalization.CultureInfo.InvariantCulture); else p["longitude"] = null;
         if (dist.HasValue) p["distance"] = dist.Value.ToString(System.Globalization.CultureInfo.InvariantCulture); else p["distance"] = null;
 
-        // Сброс страницы
         p["Page"] = 1;
         if (CurrentFilters.PerPage > 0) p["PerPage"] = CurrentFilters.PerPage;
 

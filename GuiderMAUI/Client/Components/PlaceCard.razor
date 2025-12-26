@@ -1,0 +1,67 @@
+﻿@using GuiderMAUI.Shared.Models
+@inject NavigationManager Navigation
+
+<div class="place-card" @onclick="NavigateToDetails">
+    <div class="card-image">
+        @if (Place.ImgLink != null && Place.ImgLink.Count > 0)
+        {
+            @* Берем первую картинку напрямую из списка *@
+            <img src="@Place.ImgLink[0]"
+                 alt="@Place.Name"
+                 class="card-img-element"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="no-image">
+                <span>No image</span>
+            </div>
+        }
+    </div>
+
+    <div class="card-content">
+        <div class="card-title-row">
+            <h3 class="card-title">@Place.Name</h3>
+            @if (Place.Distance.HasValue)
+            {
+                <span class="card-distance">
+                    @Place.Distance.Value.ToString("F1") km
+                </span>
+            }
+        </div>
+
+        <div class="card-location">
+            @* Иконка пина *@
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>
+                @(Place.Address?.City ?? Place.Address?.Province ?? "")
+            </span>
+        </div>
+
+        <div class="card-tags">
+            @if (Place.Tags != null)
+            {
+                @foreach (var tag in Place.Tags.Take(3))
+                {
+                    <span class="tag">@tag</span>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Place Place { get; set; } = new();
+
+    // Используем C# навигацию вместо <a href>, чтобы избежать перезагрузок WebView
+    private void NavigateToDetails()
+    {
+        if (!string.IsNullOrEmpty(Place.Url))
+        {
+            Navigation.NavigateTo($"place/{Place.Url}");
+        }
+    }
+}

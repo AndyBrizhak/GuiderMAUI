@@ -1,0 +1,209 @@
+﻿using System.Text.Json.Serialization;
+using GuiderMAUI.Shared.Utils;
+
+
+namespace GuiderMAUI.Shared.Models;
+public class Place
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    [JsonConverter(typeof(DescriptionConverter))]
+    public string Description { get; set; } = string.Empty;
+
+    [JsonPropertyName("category")]
+    public string Category { get; set; } = string.Empty;
+
+    [JsonPropertyName("status")]
+    public string? Status { get; set; } = string.Empty;
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new();
+
+    [JsonPropertyName("img_link")]
+    public List<string> ImgLink { get; set; } = new();
+
+    [JsonPropertyName("address")]
+    public Address? Address { get; set; } = new();
+
+    [JsonPropertyName("phone")]
+    public Phone? Phone { get; set; } = new();
+
+    [JsonPropertyName("social_network")]
+    public SocialNetwork? SocialNetwork { get; set; } = new();
+
+    // "Теневое" свойство для "url" из JSON
+    // Оно будет принимать значение, только если API пришлет "url"
+    [JsonPropertyName("url")]
+    public string? UrlProperty { get; set; }
+
+    //  "Теневое" свойство для "web" из JSON
+    // Оно будет принимать значение, только если API пришлет "web"
+    [JsonPropertyName("web")]
+    public string? WebProperty { get; set; }
+
+    //  Ваше "настоящее" свойство Url, которое использует приложение
+    // Оно невидимо для JSON, но содержит правильную логику.
+    [JsonIgnore]
+    public string? Url
+    {
+        get
+        {
+            // 1. Если "url" существует, используем его (высший приоритет)
+            if (!string.IsNullOrEmpty(UrlProperty))
+            {
+                return UrlProperty;
+            }
+
+            // 2. Если "url" нет, но есть "web", используем "web"
+            if (!string.IsNullOrEmpty(WebProperty))
+            {
+                return WebProperty;
+            }
+
+            // 3. Если нет ни того, ни другого, возвращаем null
+            return null;
+        }
+    }
+
+    [JsonPropertyName("preview_link")]
+    public string? PreviewLink { get; set; } = string.Empty;
+
+    [JsonPropertyName("keywords")]
+    public List<string>? Keywords { get; set; } = new();
+
+    [JsonPropertyName("owner")]
+    [JsonConverter(typeof(OwnerListConverter))]
+    public List<Owner>? Owner { get; set; } = new();
+
+    [JsonPropertyName("schedule")]
+    public List<ScheduleEntry>? Schedule { get; set; } = new();
+
+    [JsonPropertyName("location")]
+    public Location? Location { get; set; }
+
+    [JsonPropertyName("distance")]
+    public double? Distance { get; set; }
+}
+
+public class Address
+{
+    [JsonPropertyName("street")]
+    public string Street { get; set; } = string.Empty;
+
+    [JsonPropertyName("city")]
+    public string City { get; set; } = string.Empty;
+
+    [JsonPropertyName("province")]
+    public string Province { get; set; } = string.Empty;
+
+    [JsonPropertyName("country")]
+    public string Country { get; set; } = string.Empty;
+}
+
+public class Phone
+{
+    [JsonPropertyName("callable")]
+    [JsonConverter(typeof(NumberToStringConverter))]
+    public string? Callable { get; set; }
+
+    [JsonPropertyName("whatsapp")]
+    [JsonConverter(typeof(NumberToStringConverter))]
+    public string? Whatsapp { get; set; } = string.Empty;
+}
+
+public class SocialNetwork
+{
+    [JsonPropertyName("facebook")]
+    public string Facebook { get; set; } = string.Empty;
+
+    [JsonPropertyName("instagram")]
+    public string Instagram { get; set; } = string.Empty;
+}
+
+public class Owner
+{
+    [JsonPropertyName("name")]
+    public string? Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("phone")]
+    [JsonConverter(typeof(NumberToStringConverter))]
+    public string? Phone { get; set; }
+}
+
+public class Location
+{
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = string.Empty;
+
+    [JsonPropertyName("coordinates")]
+    public List<double> Coordinates { get; set; } = new();
+}
+
+// API возвращает массив напрямую, но с заголовком X-Total-Count
+public class PlacesResponse
+{
+    public List<Place> Places { get; set; } = new();
+    public long TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PerPage { get; set; }
+    public int TotalPages { get; set; }
+}
+
+public class PlaceFilterParams
+{
+    // Текстовый поиск
+    public string? Q { get; set; }
+
+    // Географические фильтры
+    public string? Province { get; set; }
+    public string? City { get; set; }
+
+    // Основные фильтры
+    public string? Name { get; set; }
+    public string? Url { get; set; }
+    public string? Category { get; set; }
+    public string? Status { get; set; }
+
+    // Теги
+    public List<string>? Tags { get; set; }
+    public string TagsMode { get; set; } = "any"; // По умолчанию "any"
+
+    // Геопространственный поиск
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public double? Distance { get; set; }
+
+    // Фильтр по времени работы
+    public bool? IsOpen { get; set; }
+
+    // Пагинация - значения по умолчанию как в API
+    public int Page { get; set; } = 1;
+    public int PerPage { get; set; } = 20;
+
+    // Сортировка - значения по умолчанию как в API
+    public string SortField { get; set; } = "name";
+    public string SortOrder { get; set; } = "ASC";
+}
+
+public class ScheduleEntry
+{
+    [JsonPropertyName("days")]
+    public List<string> Days { get; set; } = new();
+
+    [JsonPropertyName("hours")]
+    public List<HoursEntry> Hours { get; set; } = new();
+}
+
+public class HoursEntry
+{
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = string.Empty;
+
+    [JsonPropertyName("end")]
+    public string End { get; set; } = string.Empty;
+}

@@ -1,0 +1,130 @@
+﻿@using GuiderMAUI.Shared.Services
+@inject ICitiesService CitiesService
+
+<div class="city-filter-block">
+    @* --- ЗАГОЛОВОК (Кнопка открытия) --- *@
+    <button type="button" class="filter-toggle-btn @(IsExpanded ? "active" : "")" @onclick="ToggleExpand">
+        <span class="label">
+            City
+            @if (!string.IsNullOrEmpty(SelectedCity))
+            {
+                <span class="selected-badge">@SelectedCity</span>
+            }
+        </span>
+
+        @* Иконка стрелки *@
+        <span class="filter-toggle-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+        </span>
+    </button>
+
+    @* --- ВЫПАДАЮЩЕЕ ОБЛАКО ГОРОДОВ --- *@
+    @if (IsExpanded)
+    {
+        <div class="city-cloud-wrapper">
+            <div class="city-cloud-content">
+                @if (isLoading)
+                {
+                    <span class="chip-tag disabled">Loading...</span>
+                }
+                else if (activeCities.Any())
+                {
+                    @* Кнопка All Cities *@
+                    <button type="button"
+                            class="chip-tag chip-all @(string.IsNullOrEmpty(SelectedCity) ? "active" : "")"
+                            @onclick="SelectAll">
+                        All Cities
+                    </button>
+
+                    @* Список остальных городов *@
+                    @foreach (var city in activeCities)
+                    {
+                        <button type="button"
+                                class="chip-tag @(IsSelected(city) ? "active" : "")"
+                                @onclick="() => SelectCity(city)">
+                            @city
+                        </button>
+                    }
+                }
+                else
+                {
+                    <span class="no-data">No cities for this filter.</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? SelectedCity { get; set; }
+    [Parameter] public string? CurrentCategory { get; set; }
+    [Parameter] public string? CurrentProvince { get; set; }
+    [Parameter] public EventCallback<string?> OnCityChanged { get; set; }
+
+    private List<string> activeCities = new();
+    private bool isLoading = false;
+    private bool IsExpanded = false;
+
+    // Загружаем города при старте или при смене параметров (Категория/Провинция)
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadActiveCities();
+    }
+
+    private async Task LoadActiveCities()
+    {
+        isLoading = true;
+        try
+        {
+            // Запрашиваем города с учетом текущих фильтров
+            activeCities = await CitiesService.GetActiveCitiesAsync(CurrentCategory, CurrentProvince);
+
+            // Если выбранного города нет в новом списке (например, сменили провинцию), сбрасываем его
+            if (!string.IsNullOrEmpty(SelectedCity) && !activeCities.Contains(SelectedCity))
+            {
+                await OnCityChanged.InvokeAsync(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading cities: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleExpand()
+    {
+        IsExpanded = !IsExpanded;
+    }
+
+    private bool IsSelected(string city) =>
+        string.Equals(SelectedCity, city, StringComparison.OrdinalIgnoreCase);
+
+    private async Task SelectAll()
+    {
+        if (!string.IsNullOrEmpty(SelectedCity))
+        {
+            await OnCityChanged.InvokeAsync(null);
+        }
+        // Опционально: можно сворачивать список при выборе All
+        // IsExpanded = false;
+    }
+
+    private async Task SelectCity(string city)
+    {
+        // Логика переключения: нажал на активный -> снял выбор
+        if (IsSelected(city))
+        {
+            await OnCityChanged.InvokeAsync(null);
+        }
+        else
+        {
+            await OnCityChanged.InvokeAsync(city);
+        }
+    }
+}

@@ -1,0 +1,54 @@
+﻿.status-filter-container {
+    display: flex;
+    align-items: center;
+    /* Отступ сверху, чтобы отделиться от строки поиска */
+    margin-top: 12px;
+}
+
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    /* Убираем выделение текста при частых кликах */
+    user-select: none;
+}
+
+.label-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* --- Рисуем переключатель (Фон) --- */
+.toggle-switch {
+    width: 44px;
+    height: 24px;
+    background-color: #ccc; /* Серый, когда выключен */
+    border-radius: 24px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+    /* Зеленый цвет, когда включен */
+    .toggle-switch.active {
+        background-color: #28a745;
+    }
+
+/* --- Рисуем круглую кнопку (Knob) --- */
+.toggle-knob {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Сдвиг кнопки вправо при включении */
+.toggle-switch.active .toggle-knob {
+    transform: translateX(20px);
+}

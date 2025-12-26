@@ -1,0 +1,149 @@
+﻿@using GuiderMAUI.Shared.Services
+@inject ITagsService TagsService
+
+<div class="tags-filter-block">
+    @* --- ЗАГОЛОВОК (Аккордеон) --- *@
+    <button type="button" class="filter-toggle-btn @(IsExpanded ? "active" : "")" @onclick="ToggleExpand">
+        <span class="label">
+            Tags
+            @if (SelectedTags != null && SelectedTags.Any())
+            {
+                <span class="count-badge">@SelectedTags.Count</span>
+            }
+        </span>
+        <span class="filter-toggle-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20" height="20">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+        </span>
+    </button>
+
+    @* --- ОБЛАКО ТЕГОВ --- *@
+    @if (IsExpanded)
+    {
+        <div class="tags-cloud-wrapper">
+            <div class="tags-cloud-content">
+                @* Кнопка ALL *@
+                <button type="button"
+                        class="chip-tag chip-all @(SelectedTags == null || !SelectedTags.Any() ? "active" : "")"
+                        @onclick="ClearTags">
+                    All
+                </button>
+
+                @if (isLoading)
+                {
+                    <span class="chip-tag disabled">Loading tags...</span>
+                }
+                else
+                {
+                    @* Список тегов *@
+                    @foreach (var tag in displayTags)
+                    {
+                        var isSelected = IsTagSelected(tag);
+
+                        <button type="button"
+                                class="chip-tag @(isSelected ? "active" : "")"
+                                @onclick="() => ToggleTag(tag)">
+                            @tag
+                            @if (isSelected)
+                            {
+                                <span class="chip-remove">×</span>
+                            }
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<string>? SelectedTags { get; set; }
+
+    // Параметры контекста
+    [Parameter] public string? CurrentCategory { get; set; }
+    [Parameter] public string? CurrentProvince { get; set; }
+    [Parameter] public string? CurrentCity { get; set; }
+
+    [Parameter] public EventCallback<List<string>?> OnTagsChanged { get; set; }
+
+    private List<string> displayTags = new();
+    private bool isLoading = false;
+    private bool IsExpanded = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Автоматически открываем, если есть выбранные теги (один раз)
+        if (SelectedTags != null && SelectedTags.Any() && !IsExpanded && displayTags.Count == 0)
+        {
+            IsExpanded = true;
+        }
+
+        await LoadTags();
+    }
+
+    private async Task LoadTags()
+    {
+        isLoading = true;
+        try
+        {
+            // 1. Получаем активные теги из API
+            var serviceTags = await TagsService.GetActiveTagsAsync(
+                CurrentCategory,
+                CurrentProvince,
+                CurrentCity,
+                SelectedTags
+            );
+
+            // 2. Логика объединения:
+            // Добавляем к пришедшим тегам те, что уже выбраны (на случай, если API их не вернул)
+            var current = SelectedTags ?? new List<string>();
+
+            displayTags = serviceTags
+                .Union(current)            // Объединяем
+                .Distinct()                // Убираем дубли
+                .OrderByDescending(t => current.Contains(t)) // Сначала выбранные
+                .ThenBy(t => t)            // Потом по алфавиту
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Tags Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleExpand() => IsExpanded = !IsExpanded;
+
+    private bool IsTagSelected(string tag) =>
+        SelectedTags != null && SelectedTags.Contains(tag);
+
+    private async Task ToggleTag(string tag)
+    {
+        // Создаем копию списка
+        var newTags = SelectedTags != null ? new List<string>(SelectedTags) : new List<string>();
+
+        if (newTags.Contains(tag))
+        {
+            newTags.Remove(tag); // Если был -> удаляем
+        }
+        else
+        {
+            newTags.Add(tag);    // Если не было -> добавляем
+        }
+
+        // Если список пуст, передаем null
+        await OnTagsChanged.InvokeAsync(newTags.Any() ? newTags : null);
+    }
+
+    private async Task ClearTags()
+    {
+        if (SelectedTags != null && SelectedTags.Any())
+        {
+            await OnTagsChanged.InvokeAsync(null);
+        }
+    }
+}

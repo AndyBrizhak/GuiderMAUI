@@ -16,7 +16,10 @@
         else
         {
             @* Иконка *@
-            <span class="icon">📍</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
             @* Если активно - пишем 10km, иначе просто Near Me *@
             <span>@(IsActive ? "Near Me (10km)" : "Near Me")</span>
         }
@@ -63,9 +66,7 @@
             // ЛАЙФХАК ДЛЯ ТЕСТИРОВАНИЯ НА WINDOWS
             // ===========================================
 #if WINDOWS
-                // 1. Имитируем небольшую задержку, как будто ищем спутники
-                await Task.Delay(1000);
-
+                
                 // 2. Хардкод координат Playas del Coco, Costa Rica
                 double mockLat = 10.5525;
                 double mockLon = -85.6980;

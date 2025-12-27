@@ -1,0 +1,31 @@
+﻿<div class="status-filter-container">
+    <div class="toggle-wrapper" @onclick="ToggleStatus">
+        @* Текст слева *@
+        <span class="label-text">Open Now</span>
+
+        @* Сам переключатель (Визуализация) *@
+        <div class="toggle-switch @(IsActive ? "active" : "")">
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Получаем текущее состояние из URL (через родителя)
+    [Parameter] public bool? IsOpen { get; set; }
+
+    // Сообщаем родителю об изменении
+    [Parameter] public EventCallback<bool?> OnStatusChanged { get; set; }
+
+    // Вспомогательное свойство для UI (null считается как false)
+    private bool IsActive => IsOpen == true;
+
+    private async Task ToggleStatus()
+    {
+        // Если было включено (true) -> выключаем (null).
+        // Если было выключено (null или false) -> включаем (true).
+        bool? newValue = IsActive ? null : true;
+
+        await OnStatusChanged.InvokeAsync(newValue);
+    }
+}

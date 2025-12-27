@@ -1,0 +1,104 @@
+﻿@using GuiderMAUI.Shared.Models
+@using GuiderMAUI.Shared.Services
+@using Microsoft.Maui.Devices
+
+@inject IProvincesService ProvincesService
+
+<div class="province-container">
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <span>Loading locations...</span>
+        </div>
+    }
+    else
+    {
+        @* Добавляем класс для скролла (mobile/desktop) *@
+        <div class="scroll-wrapper @scrollClass">
+
+            @* 1. Кнопка "All" *@
+            <button type="button"
+                    class="prov-chip @(string.IsNullOrEmpty(SelectedProvince) ? "active" : "")"
+                    @onclick="SelectAll">
+                <span>All</span>
+            </button>
+
+            @* 2. Список провинций из API *@
+            @foreach (var p in provinces)
+            {
+                <button type="button"
+                        class="prov-chip @(IsSelected(p.Name) ? "active" : "")"
+                        @onclick="() => SelectProvince(p.Name)">
+                    <span>@p.Name</span>
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? SelectedProvince { get; set; }
+    // Опционально: можно передать категорию, чтобы фильтровать провинции, где есть эта категория
+    [Parameter] public string? CurrentCategory { get; set; }
+    [Parameter] public EventCallback<string?> OnProvinceChanged { get; set; }
+
+    private List<ProvinceDto> provinces = new();
+    private bool isLoading = true;
+
+    // Определяем платформу для стилей скролла
+    private string scrollClass => DeviceInfo.Platform == DevicePlatform.WinUI ? "desktop-mode" : "mobile-mode";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            // Загружаем список активных провинций
+            // Передаем CurrentCategory, если API поддерживает фильтрацию списка провинций по категории
+            provinces = await ProvincesService.GetActiveProvincesAsync(CurrentCategory);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Provinces Load Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Если категория изменится снаружи, можно перезагрузить список провинций
+    // (Раскомментируйте, если хотите, чтобы список провинций менялся при смене категории)
+    /*
+    protected override async Task OnParametersSetAsync()
+    {
+        // Логика перезагрузки списка при смене CurrentCategory...
+    }
+    */
+
+    private bool IsSelected(string provName)
+    {
+        return string.Equals(SelectedProvince, provName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task SelectAll()
+    {
+        if (!string.IsNullOrEmpty(SelectedProvince))
+        {
+            await OnProvinceChanged.InvokeAsync(null);
+        }
+    }
+
+    private async Task SelectProvince(string provName)
+    {
+        // Клик по активной -> сброс. Клик по новой -> выбор.
+        if (IsSelected(provName))
+        {
+            await OnProvinceChanged.InvokeAsync(null);
+        }
+        else
+        {
+            await OnProvinceChanged.InvokeAsync(provName);
+        }
+    }
+}

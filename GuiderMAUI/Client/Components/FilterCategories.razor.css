@@ -1,0 +1,100 @@
+﻿/* --- 1. Контейнер --- */
+.categories-container {
+    width: 100%;
+    /* ВАЖНО: Ограничиваем ширину экрана минус отступы.
+       Это предотвращает растягивание родительского блока на Android. */
+    max-width: calc(100vw - 48px);
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+/* --- 2. Обертка скролла (Общие настройки) --- */
+.scroll-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px; /* Расстояние между кнопками */
+    /* Включаем горизонтальную прокрутку */
+    overflow-x: auto;
+    /* Плавный скролл для iOS/Android */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; /* Место под скроллбар */
+}
+
+    /* --- 3. Настройки для МОБИЛЬНЫХ (Android / iOS) --- */
+    /* Скрываем полосу прокрутки, так как листаем пальцем */
+    .scroll-wrapper.mobile-mode {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE */
+    }
+
+        .scroll-wrapper.mobile-mode::-webkit-scrollbar {
+            display: none; /* Chrome/Safari/WebView */
+        }
+
+    /* --- 4. Настройки для WINDOWS (Desktop) --- */
+    /* Показываем тонкую полоску для мыши */
+    .scroll-wrapper.desktop-mode {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,0,0,0.2) transparent;
+        cursor: default;
+    }
+
+        /* Стилизация полосы прокрутки (Webkit / WebView2) */
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar {
+            height: 6px; /* Высота полоски */
+            display: block;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2); /* Цвет ползунка */
+            border-radius: 4px;
+        }
+
+            .scroll-wrapper.desktop-mode::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.4); /* Цвет при наведении */
+            }
+
+/* --- 5. Стили кнопок (Chips) --- */
+.cat-chip {
+    /* ВАЖНО: Запрещаем кнопкам сжиматься или растягиваться */
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    /* Компактные отступы */
+    padding: 6px 14px;
+    height: 36px;
+    border-radius: 18px;
+    border: 1px solid var(--border-color, #ccc);
+    background: var(--bg-surface, #fff);
+    color: var(--text-primary, #333);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap; /* Текст не переносится */
+    transition: all 0.2s ease;
+}
+
+    .cat-chip .icon {
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    /* Эффект нажатия */
+    .cat-chip:active {
+        transform: scale(0.95);
+        background-color: #f0f0f0;
+    }
+
+    /* Активное состояние */
+    .cat-chip.active {
+        background-color: #212529;
+        color: #fff;
+        border-color: #212529;
+    }

@@ -7,37 +7,37 @@
 @inject NavigationManager Navigation
 
 <div class="home-page">
-    @* Заголовок *@
     <div class="hero-section">
         <h1>Explore Local Businesses</h1>
     </div>
 
-    @* Список мест (Внутри него уже есть фильтр) *@
-    @* Мы передаем туда параметры и результаты загрузки *@
-    <PlacesList CurrentFilters="@currentFilters" 
-                PlacesResponse="@placesResponse" 
+    <PlacesList CurrentFilters="@currentFilters"
+                PlacesResponse="@placesResponse"
                 IsLoading="@isLoading" />
 </div>
 
 @code {
-    // Получаем параметры из URL (Query String)
-    // Когда вы нажмете кнопку поиска, форма отправит GET запрос, и эти поля обновятся
+    // Получаем параметры из URL
     [SupplyParameterFromQuery] public string? Q { get; set; }
     [SupplyParameterFromQuery] public string? Category { get; set; }
     [SupplyParameterFromQuery] public string? Province { get; set; }
     [SupplyParameterFromQuery] public string? City { get; set; }
     [SupplyParameterFromQuery] public int Page { get; set; } = 1;
+    [SupplyParameterFromQuery] public bool? IsOpen { get; set; }
+    [SupplyParameterFromQuery] public string[]? Tags { get; set; }
+
+    [SupplyParameterFromQuery] public double? Latitude { get; set; }
+    [SupplyParameterFromQuery] public double? Longitude { get; set; }
+    [SupplyParameterFromQuery] public double? Distance { get; set; }
 
     private PlaceFilterParams currentFilters = new();
     private PlacesResponse? placesResponse;
     private bool isLoading = true;
 
-    // Этот метод срабатывает при инициализации И при изменении параметров URL
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
-        
-        // 1. Собираем объект фильтра из параметров URL
+
         currentFilters = new PlaceFilterParams
         {
             Q = Q,
@@ -45,13 +45,18 @@
             Province = Province,
             City = City,
             Page = Page < 1 ? 1 : Page,
-            PerPage = 4, 
-            Status = "active"
+            PerPage = 4,
+            Status = "active",
+            IsOpen = IsOpen,
+            Tags = Tags?.ToList(),
+
+            Latitude = Latitude,
+            Longitude = Longitude,
+            Distance = Distance
         };
 
         try
         {
-            // 2. Запрашиваем данные у API
             placesResponse = await PlacesService.GetPlacesAsync(currentFilters);
         }
         catch (Exception ex)

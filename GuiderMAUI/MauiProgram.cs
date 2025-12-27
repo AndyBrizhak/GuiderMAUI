@@ -55,9 +55,9 @@ namespace GuiderMAUI
             builder.Services.AddScoped<IPlacesService, PlacesService>();
 
             // Раскомментируйте остальные, когда добавите файлы:
-            // builder.Services.AddScoped<ICitiesService, CitiesService>();
-            // builder.Services.AddScoped<IProvincesService, ProvincesService>();
-            // builder.Services.AddScoped<ITagsService, TagsService>();
+            builder.Services.AddScoped<ICitiesService, CitiesService>();
+            builder.Services.AddScoped<IProvincesService, ProvincesService>();
+            builder.Services.AddScoped<ITagsService, TagsService>();
 
             return builder.Build();
         }

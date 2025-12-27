@@ -1,0 +1,125 @@
+﻿@using Microsoft.Maui.Devices.Sensors
+@using Microsoft.Maui.ApplicationModel
+
+<div class="geo-wrapper">
+    <button type="button"
+            class="geo-btn @(IsActive ? "active" : "")"
+            @onclick="ToggleGeoLocation"
+            disabled="@isLoading">
+
+        @if (isLoading)
+        {
+            @* Спиннер загрузки *@
+            <span class="spinner"></span>
+            <span>Locating...</span>
+        }
+        else
+        {
+            @* Иконка *@
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            @* Если активно - пишем 10km, иначе просто Near Me *@
+            <span>@(IsActive ? "Near Me (10km)" : "Near Me")</span>
+        }
+    </button>
+
+    @* Вывод ошибки (красным текстом под кнопкой) *@
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <span class="error-msg">@errorMessage</span>
+    }
+</div>
+
+@code {
+    // Входящие параметры (чтобы кнопка знала, включена она или нет)
+    [Parameter] public double? Latitude { get; set; }
+    [Parameter] public double? Longitude { get; set; }
+
+    // Событие: возвращает (Широта, Долгота, Радиус)
+    [Parameter] public EventCallback<(double? lat, double? lon, double? dist)> OnGeoChanged { get; set; }
+
+    private bool IsActive => Latitude.HasValue && Longitude.HasValue;
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    // Фиксированная дистанция 10 км
+    private const double FIXED_DISTANCE = 10000;
+
+    private async Task ToggleGeoLocation()
+    {
+        errorMessage = null;
+
+        // 1. Если уже включено -> выключаем (сбрасываем)
+        if (IsActive)
+        {
+            await OnGeoChanged.InvokeAsync((null, null, null));
+            return;
+        }
+
+        // 2. Если выключено -> включаем поиск
+        isLoading = true;
+        try
+        {
+            // ===========================================
+            // ЛАЙФХАК ДЛЯ ТЕСТИРОВАНИЯ НА WINDOWS
+            // ===========================================
+#if WINDOWS
+                
+                // 2. Хардкод координат Playas del Coco, Costa Rica
+                double mockLat = 10.5525;
+                double mockLon = -85.6980;
+
+                // 3. Возвращаем эти координаты и выходим из метода
+                await OnGeoChanged.InvokeAsync((mockLat, mockLon, FIXED_DISTANCE));
+
+                // Важно: блок finally выполнится даже после return, поэтому isLoading станет false
+                return;
+#endif
+            // ===========================================
+
+
+            // --- КОД ДЛЯ ANDROID / iOS (Реальный GPS) ---
+
+            // 1. Проверяем разрешения
+            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+
+            if (status != PermissionStatus.Granted)
+            {
+                // Запрашиваем права, если их нет
+                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+
+                if (status != PermissionStatus.Granted)
+                {
+                    errorMessage = "Permission denied";
+                    return;
+                }
+            }
+
+            // 2. Запрашиваем реальные координаты
+            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+            var location = await Geolocation.Default.GetLocationAsync(request);
+
+            if (location != null)
+            {
+                // Успех! Отправляем реальные координаты
+                await OnGeoChanged.InvokeAsync((location.Latitude, location.Longitude, FIXED_DISTANCE));
+            }
+            else
+            {
+                errorMessage = "Location not found";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Geo Error: {ex.Message}");
+            errorMessage = "GPS Error";
+        }
+        finally
+        {
+            // Снимаем спиннер загрузки (работает и для Windows, и для Android)
+            isLoading = false;
+        }
+    }
+}

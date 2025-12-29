@@ -1,0 +1,47 @@
+﻿@namespace GuiderMAUI.Client.Components.PlaceDetailsComponents
+@using GuiderMAUI.Shared.Models
+
+@if (HasContacts)
+{
+    <div class="contacts-section">
+        <h3 class="section-subtitle">Contacts</h3>
+        <div class="social-links">
+
+            @if (Phone != null && !string.IsNullOrEmpty(Phone.Callable))
+            {
+                <a href="tel:@Phone.Callable" class="social-chip phone">
+                    📞 Call
+                </a>
+            }
+
+            @if (Phone != null && !string.IsNullOrEmpty(Phone.Whatsapp))
+            {
+                <a href="https://wa.me/@(Phone.Whatsapp.Replace("+", "").Replace(" ", ""))" target="_blank" class="social-chip whatsapp">
+                    💬 WhatsApp
+                </a>
+            }
+
+            @if (SocialNetwork != null && !string.IsNullOrEmpty(SocialNetwork.Instagram))
+            {
+                <a href="@SocialNetwork.Instagram" target="_blank" class="social-chip instagram">Instagram</a>
+            }
+
+            @if (SocialNetwork != null && !string.IsNullOrEmpty(SocialNetwork.Facebook))
+            {
+                <a href="@SocialNetwork.Facebook" target="_blank" class="social-chip facebook">Facebook</a>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Phone? Phone { get; set; }
+
+    [Parameter]
+    public SocialNetwork? SocialNetwork { get; set; }
+
+    private bool HasContacts =>
+        (Phone != null && (!string.IsNullOrEmpty(Phone.Callable) || !string.IsNullOrEmpty(Phone.Whatsapp))) ||
+        (SocialNetwork != null && (!string.IsNullOrEmpty(SocialNetwork.Instagram) || !string.IsNullOrEmpty(SocialNetwork.Facebook)));
+}

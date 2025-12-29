@@ -41,38 +41,7 @@
 
             <PlaceSchedule Schedule="@place.Schedule" />
 
-            @if (HasContacts(place))
-            {
-                <div class="content-section">
-                    <h3 class="section-subtitle">Contacts</h3>
-                    <div class="social-links">
-
-                        @if (place.Phone != null && !string.IsNullOrEmpty(place.Phone.Callable))
-                        {
-                            <a href="tel:@place.Phone.Callable" class="social-chip phone">
-                                📞 Call
-                            </a>
-                        }
-
-                        @if (place.Phone != null && !string.IsNullOrEmpty(place.Phone.Whatsapp))
-                        {
-                            <a href="https://wa.me/@(place.Phone.Whatsapp.Replace("+", "").Replace(" ", ""))" target="_blank" class="social-chip whatsapp">
-                                💬 WhatsApp
-                            </a>
-                        }
-
-                        @if (place.SocialNetwork != null && !string.IsNullOrEmpty(place.SocialNetwork.Instagram))
-                        {
-                            <a href="@place.SocialNetwork.Instagram" target="_blank" class="social-chip instagram">Instagram</a>
-                        }
-
-                        @if (place.SocialNetwork != null && !string.IsNullOrEmpty(place.SocialNetwork.Facebook))
-                        {
-                            <a href="@place.SocialNetwork.Facebook" target="_blank" class="social-chip facebook">Facebook</a>
-                        }
-                    </div>
-                </div>
-            }
+            <PlaceContacts Phone="@place.Phone" SocialNetwork="@place.SocialNetwork" />
 
             <PlaceTags Tags="@place.Tags" />
 
@@ -84,10 +53,8 @@
 @code {
     [Parameter]
     public string Url { get; set; } = "";
-
     private Place? place;
     private bool isLoading = true;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -107,11 +74,4 @@
             isLoading = false;
         }
     }
-        
-    private bool HasContacts(Place p)
-    {
-        bool hasPhone = p.Phone != null && (!string.IsNullOrEmpty(p.Phone.Callable) || !string.IsNullOrEmpty(p.Phone.Whatsapp));
-        bool hasSocial = p.SocialNetwork != null && (!string.IsNullOrEmpty(p.SocialNetwork.Instagram) || !string.IsNullOrEmpty(p.SocialNetwork.Facebook));
-        return hasPhone || hasSocial;
-    }
-}
+ }

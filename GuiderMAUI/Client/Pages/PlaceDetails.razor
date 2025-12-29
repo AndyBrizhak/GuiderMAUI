@@ -39,40 +39,7 @@
 
             <PlaceDescription HtmlContent="@place.Description" />
 
-            @if (place.Schedule != null && place.Schedule.Any())
-            {
-                <div class="content-section">
-                    <details class="schedule-details">
-                        <summary>
-                            <span>Working Hours</span>
-                            <span style="font-size: 0.8em; color: #999;">▼</span>
-                        </summary>
-                        <div class="schedule-table">
-                            @foreach (var entry in place.Schedule)
-                            {
-                                <div class="schedule-block">
-                                    <div class="schedule-days">
-                                        @FormatDays(entry.Days)
-                                    </div>
-                                    <div class="schedule-hours">
-                                        @if (entry.Hours != null && entry.Hours.Any())
-                                        {
-                                            @foreach (var hour in entry.Hours)
-                                            {
-                                                <span>@hour.Start - @hour.End</span>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="closed-text">Closed</span>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </details>
-                </div>
-            }
+            <PlaceSchedule Schedule="@place.Schedule" />
 
             @if (HasContacts(place))
             {
@@ -140,14 +107,7 @@
             isLoading = false;
         }
     }
-
-    private string FormatDays(List<string> days)
-    {
-        if (days == null || !days.Any()) return "";
-        var shortDays = days.Select(d => d.Length > 3 ? d.Substring(0, 3) : d);
-        return string.Join(", ", shortDays);
-    }
-
+        
     private bool HasContacts(Place p)
     {
         bool hasPhone = p.Phone != null && (!string.IsNullOrEmpty(p.Phone.Callable) || !string.IsNullOrEmpty(p.Phone.Whatsapp));

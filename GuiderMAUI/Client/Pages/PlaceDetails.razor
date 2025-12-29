@@ -1,7 +1,6 @@
 ﻿@page "/place/{url}"
 @using GuiderMAUI.Shared.Models
 @using GuiderMAUI.Shared.Services
-@using System.Globalization
 @using GuiderMAUI.Client.Components.PlaceDetailsComponents
 
 @inject IPlacesService PlacesService
@@ -33,33 +32,10 @@
         <div class="content-scroll-area">
 
             <PlaceGallery Images="@place.ImgLink" Name="@place.Name" />
-            <div class="content-section">
-                @if (!string.IsNullOrEmpty(place.Category))
-                {
-                    <span class="category-text">@place.Category</span>
-                }
-
-                <h1 class="place-title">@place.Name</h1>
-
-                <div class="address-map-line">
-                    @if (place.Address != null)
-                    {
-                        <div class="address-text">
-                            @string.Join(", ", new[] { place.Address.City, place.Address.Province }.Where(s => !string.IsNullOrEmpty(s)))
-                        </div>
-                    }
-
-                    @if (IsLocationValid(place.Location))
-                    {
-                        <a href="@GetGoogleMapsUrl(place.Location)" target="_blank" class="mini-map-btn" title="Open in Maps">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                        </a>
-                    }
-                </div>
-            </div>
+           <PlaceInfo Name="@place.Name" 
+           Category="@place.Category" 
+           Address="@place.Address" 
+           Location="@place.Location" />
 
             @if (!string.IsNullOrEmpty(place.Description))
             {
@@ -179,19 +155,6 @@
         {
             isLoading = false;
         }
-    }
-
-    private bool IsLocationValid(Location? loc)
-    {
-        return loc != null && loc.Coordinates != null && loc.Coordinates.Count >= 2;
-    }
-
-    private string GetGoogleMapsUrl(Location loc)
-    {
-        if (!IsLocationValid(loc)) return "#";
-        var lon = loc.Coordinates[0].ToString(CultureInfo.InvariantCulture);
-        var lat = loc.Coordinates[1].ToString(CultureInfo.InvariantCulture);
-        return $"https://www.google.com/maps/search/?api=1&query={lat},{lon}";
     }
 
     private string FormatDays(List<string> days)

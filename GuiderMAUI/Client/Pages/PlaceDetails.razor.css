@@ -25,22 +25,6 @@
     padding-top: 10px;
 }
 
-.category-text {
-    color: #666;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.place-title {
-    margin: 0 0 12px 0;
-    font-size: 1.6rem;
-    line-height: 1.2;
-    color: #333;
-}
-
 .section-subtitle {
     margin: 0 0 12px 0;
     font-size: 1.1rem;
@@ -48,13 +32,7 @@
     color: #333;
 }
 
-/* === ADDRESS & MAP ROW === */
-.address-map-line {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
+/* === ADDRESS  === */
 
 .address-text {
     color: #555;
@@ -64,25 +42,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* Кнопка карты */
-.mini-map-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: #f1f3f5;
-    color: #007bff;
-    border-radius: 8px;
-    flex-shrink: 0;
-    text-decoration: none;
-    border: none;
-}
-
-    .mini-map-btn:active {
-        background-color: #e2e6ea;
-    }
 
 /* === SCHEDULE === */
 .schedule-details summary {

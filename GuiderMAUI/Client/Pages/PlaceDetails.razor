@@ -2,6 +2,7 @@
 @using GuiderMAUI.Shared.Models
 @using GuiderMAUI.Shared.Services
 @using System.Globalization
+@using GuiderMAUI.Client.Components.PlaceDetailsComponents
 
 @inject IPlacesService PlacesService
 @inject NavigationManager Navigation
@@ -26,15 +27,8 @@
     }
     else
     {
-        <div class="mobile-header">
-            <button class="btn-back-icon" @onclick='() => Navigation.NavigateTo("/")'>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </button>
-            <span class="header-title">@place.Name</span>
-        </div>
+        @* === НОВЫЙ КОМПОНЕНТ ШАПКИ === *@
+        <PlaceHeader Title="@place.Name" OnBackClick='() => Navigation.NavigateTo("/")' />
 
         <div class="content-scroll-area">
 
@@ -168,13 +162,15 @@
                     </div>
                 </div>
             }
-
         </div>
     }
+
 </div>
 
 @code {
-    [Parameter] public string Url { get; set; } = "";
+    [Parameter]
+    public string Url { get; set; } = "";
+
     private Place? place;
     private bool isLoading = true;
 
@@ -221,7 +217,7 @@
     private bool HasContacts(Place p)
     {
         bool hasPhone = p.Phone != null && (!string.IsNullOrEmpty(p.Phone.Callable) || !string.IsNullOrEmpty(p.Phone.Whatsapp));
-        bool hasSocials = p.SocialNetwork != null && (!string.IsNullOrEmpty(p.SocialNetwork.Instagram) || !string.IsNullOrEmpty(p.SocialNetwork.Facebook));
-        return hasPhone || hasSocials;
+        bool hasSocial = p.SocialNetwork != null && (!string.IsNullOrEmpty(p.SocialNetwork.Instagram) || !string.IsNullOrEmpty(p.SocialNetwork.Facebook));
+        return hasPhone || hasSocial;
     }
 }

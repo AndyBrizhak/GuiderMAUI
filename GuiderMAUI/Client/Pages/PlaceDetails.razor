@@ -27,25 +27,12 @@
     }
     else
     {
-        @* === НОВЫЙ КОМПОНЕНТ ШАПКИ === *@
+        
         <PlaceHeader Title="@place.Name" OnBackClick='() => Navigation.NavigateTo("/")' />
 
         <div class="content-scroll-area">
 
-            @if (place.ImgLink != null && place.ImgLink.Any())
-            {
-                <div class="gallery-section">
-                    <div class="gallery-scroll">
-                        @foreach (var img in place.ImgLink)
-                        {
-                            <div class="gallery-item">
-                                <img src="@img" alt="@place.Name" loading="lazy" />
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-
+            <PlaceGallery Images="@place.ImgLink" Name="@place.Name" />
             <div class="content-section">
                 @if (!string.IsNullOrEmpty(place.Category))
                 {

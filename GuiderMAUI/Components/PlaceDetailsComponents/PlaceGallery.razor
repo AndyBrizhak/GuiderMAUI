@@ -1,0 +1,24 @@
+﻿@namespace GuiderMAUI.Client.Components.PlaceDetailsComponents
+
+@if (Images != null && Images.Any())
+{
+    <div class="gallery-section">
+        <div class="gallery-scroll">
+            @foreach (var img in Images)
+            {
+                <div class="gallery-item">
+                    @* Используем Name для alt-текста, если передано *@
+                    <img src="@img" alt="@(Name ?? "Place image")" loading="lazy" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<string>? Images { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+}

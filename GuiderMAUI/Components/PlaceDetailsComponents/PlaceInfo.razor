@@ -1,0 +1,64 @@
+﻿@namespace GuiderMAUI.Client.Components.PlaceDetailsComponents
+@using GuiderMAUI.Shared.Models
+@using System.Globalization
+
+<div class="info-section">
+    @if (!string.IsNullOrEmpty(Category))
+    {
+        <span class="category-text">@Category</span>
+    }
+
+    <h1 class="place-title">@Name</h1>
+
+    <div class="address-map-line">
+        @if (Address != null)
+        {
+            <div class="address-text">
+                @GetFormattedAddress()
+            </div>
+        }
+
+        @if (IsLocationValid())
+        {
+            <a href="@GetGoogleMapsUrl()" target="_blank" class="mini-map-btn" title="Open in Maps">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Category { get; set; } = string.Empty;
+
+    [Parameter]
+    public Address? Address { get; set; }
+
+    [Parameter]
+    public Location? Location { get; set; }
+
+    private string GetFormattedAddress()
+    {
+        if (Address == null) return string.Empty;
+        return string.Join(", ", new[] { Address.City, Address.Province }.Where(s => !string.IsNullOrEmpty(s)));
+    }
+
+    private bool IsLocationValid()
+    {
+        return Location != null && Location.Coordinates != null && Location.Coordinates.Count >= 2;
+    }
+
+    private string GetGoogleMapsUrl()
+    {
+        if (!IsLocationValid()) return "#";
+        var lon = Location!.Coordinates[0].ToString(CultureInfo.InvariantCulture);
+        var lat = Location.Coordinates[1].ToString(CultureInfo.InvariantCulture);
+        return $"https://www.google.com/maps/search/?api=1&query={lat},{lon}";
+    }
+}

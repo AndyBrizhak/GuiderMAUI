@@ -1,0 +1,18 @@
+﻿@namespace GuiderMAUI.Client.Components.PlaceDetailsComponents
+
+@if (Tags != null && Tags.Any())
+{
+    <div class="content-section" style="border-bottom: none;">
+        <div class="tags-wrapper">
+            @foreach (var tag in Tags)
+            {
+                <span class="tag-chip">#@tag</span>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<string>? Tags { get; set; }
+}

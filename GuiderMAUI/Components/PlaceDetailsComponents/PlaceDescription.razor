@@ -1,0 +1,15 @@
+﻿@namespace GuiderMAUI.Client.Components.PlaceDetailsComponents
+
+@if (!string.IsNullOrEmpty(HtmlContent))
+{
+    <div class="content-section description-section">
+        <div class="description-text">
+            @((MarkupString)HtmlContent)
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string HtmlContent { get; set; } = string.Empty;
+}

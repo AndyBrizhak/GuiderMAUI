@@ -1,0 +1,23 @@
+﻿.content-section {
+    background-color: #fff;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.description-section {
+    padding-top: 10px;
+}
+
+.description-text {
+    color: #333;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+    /* Стили для картинок внутри HTML описания */
+    .description-text ::deep img {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px;
+        margin: 10px 0;
+    }

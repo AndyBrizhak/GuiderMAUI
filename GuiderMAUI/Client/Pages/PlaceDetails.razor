@@ -37,14 +37,7 @@
            Address="@place.Address" 
            Location="@place.Location" />
 
-            @if (!string.IsNullOrEmpty(place.Description))
-            {
-                <div class="content-section description-section">
-                    <div class="description-text">
-                        @((MarkupString)place.Description)
-                    </div>
-                </div>
-            }
+            <PlaceDescription HtmlContent="@place.Description" />
 
             @if (place.Schedule != null && place.Schedule.Any())
             {
@@ -114,17 +107,8 @@
                 </div>
             }
 
-            @if (place.Tags != null && place.Tags.Any())
-            {
-                <div class="content-section" style="border-bottom: none;">
-                    <div class="tags-wrapper">
-                        @foreach (var tag in place.Tags)
-                        {
-                            <span class="tag-chip">#@tag</span>
-                        }
-                    </div>
-                </div>
-            }
+            <PlaceTags Tags="@place.Tags" />
+
         </div>
     }
 

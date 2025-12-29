@@ -1,0 +1,19 @@
+﻿.content-section {
+    background-color: #fff;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-chip {
+    background-color: #f1f3f5;
+    color: #555;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+}

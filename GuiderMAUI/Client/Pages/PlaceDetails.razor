@@ -1,101 +1,227 @@
 ﻿@page "/place/{url}"
 @using GuiderMAUI.Shared.Models
 @using GuiderMAUI.Shared.Services
+@using System.Globalization
 
 @inject IPlacesService PlacesService
 @inject NavigationManager Navigation
 
-<div class="details-page">
+<div class="details-root">
+
     @if (isLoading)
     {
-        <div class="loading-state">
+        <div class="state-center">
             <div class="spinner"></div>
-            <p>Loading details...</p>
+            <p>Loading...</p>
         </div>
     }
     else if (place == null)
     {
-        <div class="error-state">
-            <p>Place not found.</p>
-            <button class="btn-back" @onclick='() => Navigation.NavigateTo("/")'>Go Home</button>
+        <div class="state-center">
+            <h3>Place not found</h3>
+            <button class="mini-map-btn" style="width: auto; padding: 10px 20px;" @onclick='() => Navigation.NavigateTo("/")'>
+                Back to Home
+            </button>
         </div>
     }
     else
     {
-        <div class="place-header">
+        <div class="mobile-header">
             <button class="btn-back-icon" @onclick='() => Navigation.NavigateTo("/")'>
-                @* Символ стрелки назад *@
-                &#8592;
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
             </button>
-            <h1>@place.Name</h1>
+            <span class="header-title">@place.Name</span>
         </div>
 
-        @* Галерея картинок (горизонтальный скролл) *@
-        @if (place.ImgLink != null && place.ImgLink.Any())
-        {
-            <div class="image-gallery">
-                @foreach (var img in place.ImgLink)
-                {
-                    <div class="gallery-item">
-                        <img src="@img" alt="@place.Name" loading="lazy" />
-                    </div>
-                }
-            </div>
-        }
+        <div class="content-scroll-area">
 
-        <div class="place-content">
-            @* Карточка с основной инфой *@
-            <div class="info-card">
-                <div class="info-row">
-                    <strong>Category:</strong> <span>@place.Category</span>
-                </div>
-                <div class="info-row">
-                    <strong>Address:</strong>
-                    <span>@(place.Address?.City), @(place.Address?.Province)</span>
-                </div>
-                @* @if (place.Phone?.Callable > 0) *@
-                @* {
-                    <div class="info-row">
-                        <strong>Phone:</strong> <a href="tel:@place.Phone.Callable">@place.Phone.Callable</a>
-                    </div>
-                } *@
-            </div>
-
-            @* Описание с поддержкой HTML *@
-            @if (!string.IsNullOrEmpty(place.Description))
+            @if (place.ImgLink != null && place.ImgLink.Any())
             {
-                <div class="description-content">
-                    @((MarkupString)place.Description)
+                <div class="gallery-section">
+                    <div class="gallery-scroll">
+                        @foreach (var img in place.ImgLink)
+                        {
+                            <div class="gallery-item">
+                                <img src="@img" alt="@place.Name" loading="lazy" />
+                            </div>
+                        }
+                    </div>
                 </div>
             }
 
-            @* Теги *@
-            @if (place.Tags != null && place.Tags.Any())
-            {
-                <div class="tags-section">
-                    @foreach (var tag in place.Tags)
+            <div class="content-section">
+                @if (!string.IsNullOrEmpty(place.Category))
+                {
+                    <span class="category-text">@place.Category</span>
+                }
+
+                <h1 class="place-title">@place.Name</h1>
+
+                <div class="address-map-line">
+                    @if (place.Address != null)
                     {
-                        <span class="tag">@tag</span>
+                        <div class="address-text">
+                            @string.Join(", ", new[] { place.Address.City, place.Address.Province }.Where(s => !string.IsNullOrEmpty(s)))
+                        </div>
+                    }
+
+                    @if (IsLocationValid(place.Location))
+                    {
+                        <a href="@GetGoogleMapsUrl(place.Location)" target="_blank" class="mini-map-btn" title="Open in Maps">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </a>
                     }
                 </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(place.Description))
+            {
+                <div class="content-section description-section">
+                    <div class="description-text">
+                        @((MarkupString)place.Description)
+                    </div>
+                </div>
             }
+
+            @if (place.Schedule != null && place.Schedule.Any())
+            {
+                <div class="content-section">
+                    <details class="schedule-details">
+                        <summary>
+                            <span>Working Hours</span>
+                            <span style="font-size: 0.8em; color: #999;">▼</span>
+                        </summary>
+                        <div class="schedule-table">
+                            @foreach (var entry in place.Schedule)
+                            {
+                                <div class="schedule-block">
+                                    <div class="schedule-days">
+                                        @FormatDays(entry.Days)
+                                    </div>
+                                    <div class="schedule-hours">
+                                        @if (entry.Hours != null && entry.Hours.Any())
+                                        {
+                                            @foreach (var hour in entry.Hours)
+                                            {
+                                                <span>@hour.Start - @hour.End</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="closed-text">Closed</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </details>
+                </div>
+            }
+
+            @if (HasContacts(place))
+            {
+                <div class="content-section">
+                    <h3 class="section-subtitle">Contacts</h3>
+                    <div class="social-links">
+
+                        @if (place.Phone != null && !string.IsNullOrEmpty(place.Phone.Callable))
+                        {
+                            <a href="tel:@place.Phone.Callable" class="social-chip phone">
+                                📞 Call
+                            </a>
+                        }
+
+                        @if (place.Phone != null && !string.IsNullOrEmpty(place.Phone.Whatsapp))
+                        {
+                            <a href="https://wa.me/@(place.Phone.Whatsapp.Replace("+", "").Replace(" ", ""))" target="_blank" class="social-chip whatsapp">
+                                💬 WhatsApp
+                            </a>
+                        }
+
+                        @if (place.SocialNetwork != null && !string.IsNullOrEmpty(place.SocialNetwork.Instagram))
+                        {
+                            <a href="@place.SocialNetwork.Instagram" target="_blank" class="social-chip instagram">Instagram</a>
+                        }
+
+                        @if (place.SocialNetwork != null && !string.IsNullOrEmpty(place.SocialNetwork.Facebook))
+                        {
+                            <a href="@place.SocialNetwork.Facebook" target="_blank" class="social-chip facebook">Facebook</a>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (place.Tags != null && place.Tags.Any())
+            {
+                <div class="content-section" style="border-bottom: none;">
+                    <div class="tags-wrapper">
+                        @foreach (var tag in place.Tags)
+                        {
+                            <span class="tag-chip">#@tag</span>
+                        }
+                    </div>
+                </div>
+            }
+
         </div>
     }
 </div>
 
 @code {
     [Parameter] public string Url { get; set; } = "";
-
     private Place? place;
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrEmpty(Url))
+        try
         {
-            // Используем ваш метод
-            place = await PlacesService.GetPlaceByUrlAsync(Url);
+            isLoading = true;
+            if (!string.IsNullOrEmpty(Url))
+            {
+                place = await PlacesService.GetPlaceByUrlAsync(Url);
+            }
         }
-        isLoading = false;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool IsLocationValid(Location? loc)
+    {
+        return loc != null && loc.Coordinates != null && loc.Coordinates.Count >= 2;
+    }
+
+    private string GetGoogleMapsUrl(Location loc)
+    {
+        if (!IsLocationValid(loc)) return "#";
+        var lon = loc.Coordinates[0].ToString(CultureInfo.InvariantCulture);
+        var lat = loc.Coordinates[1].ToString(CultureInfo.InvariantCulture);
+        return $"https://www.google.com/maps/search/?api=1&query={lat},{lon}";
+    }
+
+    private string FormatDays(List<string> days)
+    {
+        if (days == null || !days.Any()) return "";
+        var shortDays = days.Select(d => d.Length > 3 ? d.Substring(0, 3) : d);
+        return string.Join(", ", shortDays);
+    }
+
+    private bool HasContacts(Place p)
+    {
+        bool hasPhone = p.Phone != null && (!string.IsNullOrEmpty(p.Phone.Callable) || !string.IsNullOrEmpty(p.Phone.Whatsapp));
+        bool hasSocials = p.SocialNetwork != null && (!string.IsNullOrEmpty(p.SocialNetwork.Instagram) || !string.IsNullOrEmpty(p.SocialNetwork.Facebook));
+        return hasPhone || hasSocials;
     }
 }

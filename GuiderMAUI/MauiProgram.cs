@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using GuiderMAUI.Shared.Services;
 using GuiderMAUI.Shared.Models;
-using System.Net.Http; // Обязательно для HttpClientHandler
+using System.Reflection; // Для чтения встроенного файла
+using Microsoft.Extensions.Configuration; // Для работы с JSON конфигом
 
 namespace GuiderMAUI
 {
@@ -19,31 +20,66 @@ namespace GuiderMAUI
 
             builder.Services.AddMauiBlazorWebView();
 
+            // ==============================================================
+            // 1. ЗАГРУЗКА APPSETTINGS.JSON
+            // ==============================================================
+            var a = Assembly.GetExecutingAssembly();
+            // ВАЖНО: Имя ресурса = ИмяВашегоПроекта.ИмяФайла
+            // Если проект называется GuiderMAUI, то строка ниже верная:
+            using var stream = a.GetManifestResourceStream("GuiderMAUI.appsettings.json");
+
+            if (stream != null)
+            {
+                var config = new ConfigurationBuilder()
+                    .AddJsonStream(stream)
+                    .Build();
+
+                builder.Configuration.AddConfiguration(config);
+            }
+
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
 #endif
 
             // ==============================================================
-            // НАСТРОЙКА HTTP CLIENT (HTTPS + ОБХОД SSL)
+            // 2. НАСТРОЙКА HTTP CLIENT (ВЫБОР МЕЖДУ LOCAL И REMOTE)
             // ==============================================================
 
-            // Порт вашего API (Docker/HTTPS)
-            const string PORT = "8081";
+            // Читаем настройки из JSON
+            bool useLocal = builder.Configuration.GetValue<bool>("ApiSettings:UseLocal");
+            string remoteUrl = builder.Configuration["ApiSettings:RemoteUrl"];
+            string localPort = builder.Configuration["ApiSettings:LocalPort"];
 
-            // 1. Формируем URL с HTTPS
-            // Для Android Эмулятора используем 10.0.2.2, для Windows - localhost
-            string apiBaseUrl = DeviceInfo.Platform == DevicePlatform.Android
-                ? $"https://10.0.2.2:{PORT}/"
-                : $"https://localhost:{PORT}/";
+            string apiBaseUrl;
+            HttpClientHandler handler;
 
-            // 2. Создаем специальный Handler, который отключает проверку SSL сертификатов.
-            // Это критически важно для локальной работы с Docker/Self-signed certs.
-            HttpClientHandler insecureHandler = GetInsecureHandler();
+            if (useLocal)
+            {
+                // ЛОГИКА ДЛЯ ЛОКАЛЬНОГО API
+                string localHost = DeviceInfo.Platform == DevicePlatform.Android
+                    ? builder.Configuration["ApiSettings:LocalAndroidHost"] // 10.0.2.2
+                    : builder.Configuration["ApiSettings:LocalWindowsHost"]; // localhost
 
-            // 3. Регистрируем HttpClient, передавая ему наш "всепрощающий" Handler
+                apiBaseUrl = $"https://{localHost}:{localPort}/";
+
+                // Для локалки используем "всепрощающий" SSL хендлер
+                handler = GetInsecureHandler();
+            }
+            else
+            {
+                // ЛОГИКА ДЛЯ УДАЛЕННОГО СЕРВЕРА
+                apiBaseUrl = remoteUrl;
+
+                // Для продакшена (guider.pro) используем стандартный безопасный хендлер.
+                // Если там стоит настоящий SSL сертификат (Let's Encrypt и т.д.),
+                // то insecureHandler НЕ НУЖЕН и даже опасен.
+                handler = new HttpClientHandler();
+            }
+
+            // Регистрируем HttpClient с выбранным URL и Handler-ом
             builder.Services.AddScoped(sp =>
-                new HttpClient(insecureHandler)
+                new HttpClient(handler)
                 {
                     BaseAddress = new Uri(apiBaseUrl)
                 });
@@ -51,10 +87,9 @@ namespace GuiderMAUI
             // ==============================================================
             // РЕГИСТРАЦИЯ СЕРВИСОВ
             // ==============================================================
+            // Ваши сервисы полностью совместимы, менять их код не нужно.
 
             builder.Services.AddScoped<IPlacesService, PlacesService>();
-
-            // Раскомментируйте остальные, когда добавите файлы:
             builder.Services.AddScoped<ICitiesService, CitiesService>();
             builder.Services.AddScoped<IProvincesService, ProvincesService>();
             builder.Services.AddScoped<ITagsService, TagsService>();
@@ -62,15 +97,11 @@ namespace GuiderMAUI
             return builder.Build();
         }
 
-        // --- Метод для игнорирования ошибок SSL сертификатов ---
+        // --- Метод для игнорирования ошибок SSL сертификатов (Только для локалки) ---
         private static HttpClientHandler GetInsecureHandler()
         {
             var handler = new HttpClientHandler();
-
-            // Эта лямбда возвращает true для любого сертификата сервера,
-            // предотвращая ошибку "The remote certificate is invalid".
             handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-
             return handler;
         }
     }

@@ -23,20 +23,34 @@
         border-color: #007bff;
     }
 
+
 .card-image {
     width: 100%;
-    height: 180px; /* Чуть уменьшил высоту картинки для компактности (было 200) */
+    height: 180px; /* Фиксированная высота сохраняет стандартный размер блока */
     overflow: hidden;
-    background: var(--bg-surface-hover);
+    /* Используем нейтральный фон для пустого пространства вокруг картинки */
+    background-color: #f8f9fa;
     position: relative;
+    /* Добавляем центрирование с помощью Flexbox, 
+       чтобы невысокие или узкие картинки были ровно посередине */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card-img-element {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    /* Максимальные размеры равны контейнеру */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    /* 
+       contain - вписывает картинку целиком, сохраняя пропорции. 
+       cover - (было раньше) заполняло блок, обрезая края. */
+    object-fit: contain;
     display: block;
 }
+
 
 .no-image {
     width: 100%;

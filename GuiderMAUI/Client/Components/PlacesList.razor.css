@@ -4,6 +4,7 @@
     padding: 0.5rem 0;
 }
 
+/* --- Загрузка --- */
 .loading {
     padding: 2rem 1rem;
     display: flex;
@@ -31,6 +32,7 @@
     }
 }
 
+/* --- Сетка карточек --- */
 .places-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -51,213 +53,69 @@
 }
 
 /* =========================================
-    СТИЛИ ДЛЯ СОРТИРОВКИ (Mobile-First Fix)
-=========================================
-*/
-.sort-controls {
-    display: flex;
-    flex-wrap: nowrap; /* 1. Запрещаем перенос на новую строку */
-    align-items: center; /* 2. Выравниваем все по центру вертикально */
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    background-color: var(--bg-surface);
-    padding: 0.5rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color); /* Опционально: рамка вокруг блока сортировки */
-}
-
-    /* Форма растягивается, чтобы занять место */
-    .sort-controls form {
-        flex-grow: 1;
-        min-width: 0;
-    }
-
-    /* Внутри формы делаем Flex, чтобы Label и Select были в ряд */
-    .sort-controls .form-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0; /* Убираем отступ снизу */
-    }
-
-    /* Метка "Sort by:" */
-    .sort-controls label {
-        margin-bottom: 0;
-        white-space: nowrap; /* Текст не переносится */
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-    }
-
-    /* Выпадающий список */
-    .sort-controls .form-control {
-        width: 100%;
-        padding: 0.4rem 2rem 0.4rem 0.5rem; /* Отступ справа для стрелки */
-        font-size: 0.9rem;
-        background-color: var(--bg-surface);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        height: 38px; /* Фиксируем высоту */
-    }
-
-/* Кнопка направления сортировки */
-.btn-sort-order {
-    flex-shrink: 0; /* Не сжиматься */
-    width: 38px; /* Квадратная кнопка */
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-surface);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-    .btn-sort-order:hover {
-        background: var(--bg-surface-hover);
-        border-color: #007bff;
-        color: #007bff;
-    }
-
-    .btn-sort-order svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-        stroke-width: 2;
-        fill: none;
-    }
-
-/* На очень узких экранах (меньше 360px) скрываем текст "Sort by", чтобы влез селект */
-@media (max-width: 360px) {
-    .sort-controls label {
-        display: none;
-    }
-}
-
-
-/* =========================================
-    СТИЛИ ПАГИНАЦИИ
-=========================================
-*/
-
-.pagination {
-    background: var(--bg-surface);
-    /* box-shadow: 0 2px 4px var(--shadow-color); Убрал тень, чтобы не было лишнего нагромождения */
-    padding: 0.5rem;
-    border-radius: 12px;
-    margin-top: 1rem;
-}
+    СТИЛИ ПАГИНАЦИИ 
+========================================= */
 
 .pagination-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.pagination-info {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-}
-
-.btn-page {
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-    .btn-page:hover:not(.disabled) {
-        background-color: #007bff;
-        border-color: #007bff;
-        color: #fff;
-    }
-
-    .btn-page.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-
-/* Блок "Per Page" (скрыт на мобильных, виден на десктопе) */
-.pagination-per-page {
-    display: none;
-}
-
-@media (min-width: 768px) {
-    .pagination-per-page {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-left: 1rem;
-        padding-left: 1rem;
-        border-left: 1px solid var(--border-color);
-    }
-
-        .pagination-per-page .form-control {
-            width: auto;
-            padding: 0.3rem 1.5rem 0.3rem 0.5rem;
-        }
-}
-
-/* Утилита для SEO */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/* Стили для пагинации */
-.pagination-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem; /* Отступ между элементами */
+    gap: 1.5rem;
     margin-top: 1.5rem;
     padding-bottom: 2rem;
 }
 
 .pagination-info {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
+    min-width: 80px; /* Чтобы текст не "прыгал" при смене цифр */
+    text-align: center;
 }
 
 .btn-page {
+    /* Размеры для удобного нажатия пальцем */
+    width: 48px;
+    height: 48px;
+    /* Центрирование иконки */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Оформление */
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: 50%; /* Круглая форма */
     cursor: pointer;
     box-shadow: 0 2px 4px var(--shadow-color);
     transition: all 0.2s ease;
 }
 
-    .btn-page:active {
+    /* Размер иконки внутри кнопки */
+    .btn-page svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+    }
+
+    /* Состояния кнопки */
+    .btn-page:hover:not(:disabled) {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-page:active:not(:disabled) {
         transform: scale(0.95);
-        background-color: var(--bg-surface-hover);
+        box-shadow: none;
     }
 
     .btn-page:disabled {
-        opacity: 0.5;
+        opacity: 0.3;
         cursor: not-allowed;
-        box-shadow: none;
         background-color: transparent;
+        box-shadow: none;
+        border-color: var(--border-color);
     }

@@ -2,14 +2,19 @@
     padding-bottom: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    /*  Уменьшаем расстояние между крупными блоками (Заголовок / Фильтр / Список) */
+    gap: 0.5rem; /* Было 1rem */
 }
 
 .hero-section {
     background: var(--bg-surface);
-    padding: 1rem;
+    padding: 1rem 1rem;
     border-radius: 12px;
-    box-shadow: 0 2px 4px var(--shadow-color);
+    box-shadow: 0 1px 3px var(--shadow-color);
+    border: 1px solid var(--border-color, #e0e0e0);
+    /* Можно вообще убрать этот блок на мобильных, если нужно еще больше места,
+       но пока просто делаем его аккуратным */
+    margin-bottom: 0.25rem;
 }
 
     .hero-section h1 {

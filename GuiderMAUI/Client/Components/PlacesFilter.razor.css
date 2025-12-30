@@ -1,12 +1,16 @@
 ﻿.filter-card {
     background: var(--bg-surface);
-    box-shadow: 0 2px 4px var(--shadow-color);
     border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: 12px; /* Было 1rem (16px), стало плотнее */
+    /* Уменьшаем отступ до списка карточек снизу */
+    margin-bottom: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    /* ВАЖНО: Уменьшаем расстояние между блоками фильтров (Поиск, Категории и т.д.) */
+    gap: 0.5rem; /* Было 1rem */
+    /* Добавляем легкую границу, как у карточек, для стиля */
+    border: 1px solid var(--border-color, #e0e0e0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 @media (min-width: 768px) {
@@ -18,7 +22,8 @@
 .quick-filters-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 12px;
+    gap: 8px;
+    /* Уменьшаем отступ сверху для быстрых фильтров */
+    margin-top: 4px;
     flex-wrap: wrap;
 }

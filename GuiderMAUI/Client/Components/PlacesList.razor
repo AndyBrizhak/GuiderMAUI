@@ -20,13 +20,16 @@
             }
         </div>
 
-        @* --- НОВАЯ СЕКЦИЯ: ПАГИНАЦИЯ --- *@
+        @* ---  СЕКЦИЯ: ПАГИНАЦИЯ --- *@
         <div class="pagination-controls">
             @* Кнопка НАЗАД *@
             <button class="btn-page"
                     disabled="@(PlacesResponse.Page <= 1)"
-                    @onclick="GoToPrevPage">
-                ← Prev
+                    @onclick="GoToPrevPage"
+                    aria-label="Previous page">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
             </button>
 
             @* Информация о страницах *@
@@ -37,8 +40,11 @@
             @* Кнопка ВПЕРЕД *@
             <button class="btn-page"
                     disabled="@(PlacesResponse.Page >= PlacesResponse.TotalPages)"
-                    @onclick="GoToNextPage">
-                Next →
+                    @onclick="GoToNextPage"
+                    aria-label="Next page">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
             </button>
         </div>
     }

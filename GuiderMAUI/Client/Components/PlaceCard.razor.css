@@ -1,53 +1,56 @@
 ﻿.place-card {
     background: var(--bg-surface);
-    box-shadow: 0 2px 8px var(--shadow-color);
+    /* Добавляем явную границу для четкости */
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 12px;
+    /* Делаем тень мягче, но граница теперь держит форму */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     color: var(--text-primary);
-    /* ⬇️ ИЗМЕНЕНИЕ: Увеличено для более плавных углов */
-    border-radius: 12px; /* Было 8px */
-
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: all 0.2s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
     text-decoration: none;
+    position: relative;
 }
 
     .place-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 4px 16px var(--shadow-color);
+        transform: translateY(-2px);
+        /* При наведении выделяем сильнее */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #007bff;
     }
+
 
 .card-image {
     width: 100%;
-    height: 200px;
+    height: 180px; /* Фиксированная высота сохраняет стандартный размер блока */
     overflow: hidden;
-    background: var(--bg-surface-hover);
-    display: flex; /* Чтобы picture растягивался */
+    /* Используем нейтральный фон для пустого пространства вокруг картинки */
+    background-color: #f8f9fa;
+    position: relative;
+    /* Добавляем центрирование с помощью Flexbox, 
+       чтобы невысокие или узкие картинки были ровно посередине */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-    /* Добавляем правило для picture, чтобы он занимал все место */
-    .card-image picture {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.card-img-element {
+    /* Максимальные размеры равны контейнеру */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    /* 
+       contain - вписывает картинку целиком, сохраняя пропорции. 
+       cover - (было раньше) заполняло блок, обрезая края. */
+    object-fit: contain;
+    display: block;
+}
 
-    /* Обновляем селектор: теперь img находится внутри picture */
-    .card-image img,
-    .card-image .card-img-element {
-        width: 100%;
-        height: 100%;
-        /* contain - показывает картинку целиком с полосами,
-           cover - заполняет все место, но обрезает края.
-           Выберите то, что вам больше нравится. Сейчас стоит contain. */
-        object-fit: contain;
-    }
 
 .no-image {
     width: 100%;
@@ -55,197 +58,66 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-surface-hover);
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.card-content {
-    padding: 0.5rem 1rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-@media (min-width: 768px) {
-    .card-content {
-        padding: 1rem;
-    }
-}
-
-.card-title {
-    margin: 0; 
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    flex-grow: 1; /*  Позволяет заголовку занимать место */
-}
-
-.card-category {
-    margin-bottom: 0.75rem;
-}
-
-.category-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    background: #e3f2fd;
-    color: #1976d2;
-    /* ⬇️ ИЗМЕНЕНИЕ: Увеличено */
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: capitalize;
-}
-
-.card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.tag {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background: var(--bg-surface-hover);
-    color: var(--text-secondary);
-    /* ⬇️ ИЗМЕНЕНИЕ: Увеличено */
-    border-radius: 6px; /* Было 4px */
-    font-size: 0.8rem;
-}
-
-.card-location {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin-top: auto;
-}
-
-    .card-location svg {
-        flex-shrink: 0;
-    }
-
-/*
-=========================================
-    СТИЛИ ДЛЯ ЗАГОЛОВКА И ДИСТАНЦИИ
-=========================================
-*/
-
-.card-title-row {
-    display: flex;
-    justify-content: space-between; /* Прижимает элементы по краям */
-    align-items: flex-start; /* Выравнивание по верху */
-    gap: 8px; /* Отступ между ними */
-    
-    margin: 0 0 0.75rem 0;
-}
-
-.card-distance {
-    flex-shrink: 0; /* Не сжимать текст */
-    font-size: 0.875rem; /* Чуть меньше заголовка */
-    font-weight: 500;
-    color: var(--text-secondary); /* "Серый" цвет, как у локации */
-    white-space: nowrap; /* "1.5 km" не будет переноситься */
-
-    padding-top: 1px;
-}
-
-.place-card {
-    background: var(--bg-surface);
-    box-shadow: 0 2px 8px var(--shadow-color);
-    color: var(--text-primary);
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    /* Убираем text-decoration, так как теперь это div, а не a */
-}
-
-.card-image {
-    width: 100%;
-    height: 200px; /* Фиксированная высота картинки */
-    overflow: hidden;
-    background: var(--bg-surface-hover);
-    position: relative;
-}
-
-/* ВАЖНО: Класс для прямого тега img */
-.card-img-element {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Картинка заполнит область, обрезав лишнее */
-    display: block;
+    background-color: #f0f0f0;
 }
 
 .card-content {
-    padding: 1rem;
+    padding: 12px; /* Уменьшил с 1rem (16px) до 12px */
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    /* ВАЖНО: Уменьшил отступ между элементами внутри (Название - Адрес) */
+    gap: 4px;
 }
 
 .card-title-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 8px;
+    margin-bottom: 2px; /* Микро-отступ снизу заголовка */
 }
 
 .card-title {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.25;
 }
 
 .card-distance {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #007bff;
     background: #e3f2fd;
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;
+    font-weight: 600;
 }
 
 .card-location {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    gap: 4px;
+    color: var(--text-secondary, #666);
+    font-size: 0.85rem;
+    /* Гарантируем, что адрес не слипается с тегами снизу */
+    margin-bottom: 6px;
 }
 
 .card-tags {
-    margin-top: auto; /* Прижимаем теги к низу */
+    margin-top: auto; /* Прижимает теги к низу, если карточка растягивается */
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
 }
 
 .tag {
     font-size: 0.75rem;
-    background: var(--bg-surface-hover);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: var(--text-secondary);
-}
-
-.no-image {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
+    background-color: #f1f1f1;
+    color: #555;
+    padding: 2px 8px;
+    border-radius: 10px;
 }

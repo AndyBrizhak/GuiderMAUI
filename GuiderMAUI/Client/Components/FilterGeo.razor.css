@@ -1,13 +1,15 @@
 ﻿.geo-wrapper {
     display: flex;
     flex-direction: column;
+    /* Гарантируем отсутствие внешних отступов */
+    margin: 0;
 }
 
 .geo-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    padding: 0 14px; /* Убрал вертикальный паддинг, так как есть фикс. высота */
     border-radius: 20px;
     border: 1px solid var(--border-color);
     background: var(--bg-surface);
@@ -16,16 +18,15 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    height: 40px; /* Фиксированная высота */
+    /* Эта высота (40px) теперь совпадает с FilterStatus */
+    height: 40px;
 }
 
-    /* Эффект нажатия */
     .geo-btn:active {
         transform: scale(0.95);
         background: var(--bg-surface-hover);
     }
 
-    /* Активное состояние (синий цвет) */
     .geo-btn.active {
         background: #e3f2fd;
         border-color: #007bff;
@@ -38,16 +39,19 @@
     color: red;
     margin-left: 4px;
     margin-top: 2px;
+    position: absolute; /* Чтобы ошибка не сдвигала верстку, если появится */
+    transform: translateY(40px);
 }
 
-/* Анимация крутящегося спиннера */
+/* Спиннер (если используется) */
 .spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-left-color: currentColor;
     border-radius: 50%;
-    animation: spin 0.75s linear infinite;
+    animation: spin 1s linear infinite;
+    display: inline-block;
 }
 
 @keyframes spin {

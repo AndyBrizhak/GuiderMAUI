@@ -6,14 +6,37 @@
 
 .gallery-scroll {
     display: flex;
-    overflow-x: auto;
+    overflow-x: auto; /* Разрешаем прокрутку */
     gap: 12px;
     padding-right: 16px;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x mandatory; /* Оставляем красивую доводку */
+    scroll-behavior: smooth;
+    /* Убираем скрытие скроллбара и настраиваем его внешний вид */
+    scrollbar-width: thin; /* Firefox: тонкий скроллбар */
+    scrollbar-color: #ccc transparent; /* Цвет ползунка и фона */
+    /* Делаем контур фокуса видимым, чтобы понимать, когда работает клавиатура */
+    outline: none;
 }
 
+    .gallery-scroll:focus-visible {
+        /* Подсветка, если выбрали галерею клавиатурой (Tab) */
+        outline: 2px solid #007bff;
+        border-radius: 4px;
+    }
+
+    /* Стилизация скроллбара для WebKit (Chrome, Edge, Safari, Android, MAUI) */
     .gallery-scroll::-webkit-scrollbar {
-        display: none;
+        height: 6px; /* Высота полосы прокрутки */
+        display: block; /* ОБЯЗАТЕЛЬНО показываем его */
+    }
+
+    .gallery-scroll::-webkit-scrollbar-track {
+        background: transparent; /* Фон прозрачный */
+    }
+
+    .gallery-scroll::-webkit-scrollbar-thumb {
+        background-color: #ccc; /* Цвет ползунка */
+        border-radius: 10px; /* Закругления */
     }
 
 .gallery-item {

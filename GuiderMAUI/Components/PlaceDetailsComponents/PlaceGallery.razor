@@ -3,7 +3,10 @@
 @if (Images != null && Images.Any())
 {
     <div class="gallery-section">
-        <div class="gallery-scroll">
+        @* tabindex="0" -> Делает div доступным для фокуса.
+           Теперь можно кликнуть по галерее и листать СТРЕЛКАМИ на клавиатуре.
+        *@
+        <div class="gallery-scroll" tabindex="0" aria-label="Image gallery">
             @foreach (var img in Images)
             {
                 <div class="gallery-item">
